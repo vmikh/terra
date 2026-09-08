@@ -2,7 +2,12 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { surfaceAt, yearAtSurfacePosition } from './planet-model';
+import {
+  surfaceAt,
+  surfaceFrames,
+  yearAtSurfacePosition,
+} from './planet-model';
+import { TextureCache } from './texture-cache';
 import { lightsAt } from './night-lights';
 import { NOW, MAX } from './epochs';
 
@@ -12,6 +17,7 @@ type Props = {
   rotate?: boolean;
   zoom?: number;
   reset?: number;
+  jump?: number;
   lang?: string;
   climate?: boolean;
   warming?: number;
@@ -69,6 +75,7 @@ export default function Globe({
   lang = 'ru',
   climate = false,
   warming = 0,
+  jump = 0,
 }: Props) {
   const host = useRef<HTMLDivElement>(null),
     settings = useRef({ year, clouds, rotate, climate, warming }),
@@ -77,11 +84,14 @@ export default function Globe({
     settings.current = { year, clouds, rotate, climate, warming };
   }, [year, clouds, rotate, climate, warming]);
   const api = useRef<{
-    update: (year: number) => void;
+    update: (year: number, immediate?: boolean) => void;
     camera: THREE.PerspectiveCamera;
     controls: OrbitControls;
     globe: THREE.Mesh;
   } | null>(null);
+  const lastJump = useRef(jump);
+  const retryTextures = useRef<() => void>(() => {});
+  const [preload, setPreload] = useState({ done: 0, total: 0, failed: false });
   const [error, setError] = useState(false),
     [loading, setLoading] = useState(true);
   useEffect(() => {
@@ -266,8 +276,40 @@ export default function Globe({
     const fill = new THREE.DirectionalLight(0x326ac5, 0.35);
     fill.position.set(4, -2, -3);
     scene.add(fill);
-    const load = (url: string, color = true) =>
-      new Promise<THREE.Texture>((resolve, reject) =>
+    const manifest = [
+      ...new Set([
+        '/textures/hq/modern.jpg',
+        '/textures/surface/modern-field.png',
+        '/textures/hq/proto.jpg',
+        '/textures/surface/proto-field.png',
+        '/textures/lava.jpg',
+        '/textures/clouds.png',
+        '/textures/hq/night-2016.jpg',
+        '/textures/hq/modern-height.jpg',
+        '/textures/hq/relief.jpg',
+        ...surfaceFrames.flatMap((f) => [
+          `/textures/hq/${f.key}.jpg`,
+          `/textures/surface/${f.key}-field.png`,
+        ]),
+        ...surfaceFrames
+          .slice(0, -1)
+          .flatMap((f, i) =>
+            f.key === surfaceFrames[i + 1].key
+              ? []
+              : [`/textures/motion/${f.key}_${surfaceFrames[i + 1].key}.png`],
+          ),
+      ]),
+    ];
+    const assets = new TextureCache(manifest, (done, total, failed) =>
+      setPreload({ done, total, failed }),
+    );
+    retryTextures.current = () => {
+      void assets.preload();
+    };
+    const load = async (path: string, color = true) => {
+      const url = await assets.get(path);
+      if (disposed) throw new Error('disposed');
+      return new Promise<THREE.Texture>((resolve, reject) =>
         loader.load(
           url,
           (t) => {
@@ -286,6 +328,7 @@ export default function Globe({
           reject,
         ),
       );
+    };
     const cache = new Map<string, Promise<Pair>>();
     const loaded = new Map<string, Pair>();
     let activeKeys: string[] = [];
@@ -315,7 +358,8 @@ export default function Globe({
     const evict = () => {
       for (const key of cache.keys()) {
         if (cache.size <= 4) break;
-        if (activeKeys.includes(key) || !loaded.has(key)) continue;
+        if (key === 'proto' || activeKeys.includes(key) || !loaded.has(key))
+          continue;
         const p = loaded.get(key)!;
         p.map.dispose();
         p.field.dispose();
@@ -325,21 +369,17 @@ export default function Globe({
         loaded.delete(key);
       }
     };
-    const lavaReady = load('/textures/lava.jpg').then((t) => {
-      t.wrapS = t.wrapT = THREE.RepeatWrapping;
-      uniforms.lava.value = t;
-    });
-    load('/textures/clouds.png')
-      .then((t) => {
-        cloudMaterial.map = t;
-        cloudMaterial.needsUpdate = true;
-      })
-      .catch(() => {});
-    load('/textures/hq/night-2016.jpg')
-      .then((t) => {
-        lightUniforms.nightMap.value = t;
-      })
-      .catch(() => {});
+    let lavaReady: Promise<void> | undefined;
+    const getLava = () =>
+      (lavaReady ??= load('/textures/lava.jpg')
+        .then((t) => {
+          t.wrapS = t.wrapT = THREE.RepeatWrapping;
+          uniforms.lava.value = t;
+        })
+        .catch((error) => {
+          lavaReady = undefined;
+          throw error;
+        }));
     const motions = new Map<string, THREE.Texture>();
     const getMotion = async (a: string, b: string) => {
       if (a === b) return blank;
@@ -360,24 +400,53 @@ export default function Globe({
     };
     let terrainRelief: THREE.Texture | null = null;
     let modernRelief: THREE.Texture | null = null;
-    load('/textures/hq/modern-height.jpg', false)
-      .then((t) => {
-        modernRelief = t;
-        if (target.modern === 1) {
-          material.bumpMap = t;
-          material.bumpScale = 0.025;
-          material.needsUpdate = true;
-        }
-      })
-      .catch(() => {});
-    load('/textures/hq/relief.jpg', false)
-      .then((t) => {
-        material.bumpMap = t;
-        material.bumpScale = 0.012;
-        material.needsUpdate = true;
-      })
-      .catch(() => {});
-    const setSurface = async (position: number) => {
+    let backgroundStarted = false;
+    const startBackground = () => {
+      if (disposed || backgroundStarted) return;
+      backgroundStarted = true;
+      void assets.preload();
+      // Keep the tour's first surface decoded and uploaded for immediate playback.
+      void Promise.all([pair('proto'), getLava()])
+        .then(([first]) => {
+          if (disposed) return;
+          renderer.initTexture(first.map);
+          renderer.initTexture(first.field);
+          renderer.initTexture(uniforms.lava.value);
+        })
+        .catch(() => {});
+      load('/textures/clouds.png')
+        .then((t) => {
+          cloudMaterial.map = t;
+          cloudMaterial.needsUpdate = true;
+        })
+        .catch(() => {});
+      load('/textures/hq/night-2016.jpg')
+        .then((t) => {
+          lightUniforms.nightMap.value = t;
+        })
+        .catch(() => {});
+      load('/textures/hq/modern-height.jpg', false)
+        .then((t) => {
+          modernRelief = t;
+          if (target.modern > 0.999999) {
+            material.bumpMap = t;
+            material.bumpScale = 0.025;
+            material.needsUpdate = true;
+          }
+        })
+        .catch(() => {});
+      load('/textures/hq/relief.jpg', false)
+        .then((t) => {
+          terrainRelief = t;
+          if (target.modern < 0.999999) {
+            material.bumpMap = t;
+            material.bumpScale = 0.012;
+            material.needsUpdate = true;
+          }
+        })
+        .catch(() => {});
+    };
+    const setSurface = async (position: number, immediate = false) => {
       pending = true;
       const id = generation;
       const next = surfaceAt(yearAtSurfacePosition(position));
@@ -386,11 +455,19 @@ export default function Globe({
           pair(next.from.key),
           pair(next.to.key),
           getMotion(next.from.key, next.to.key),
-          lavaReady,
+          next.heat > 0 ? getLava() : Promise.resolve(),
         ]);
         if (disposed || id !== generation) return;
         displayedPosition = position;
         target = next;
+        if (immediate)
+          Object.assign(visual, {
+            heat: next.heat,
+            dry: next.dry,
+            electric: next.electric,
+            ancient: next.ancient,
+            ice: next.ice,
+          });
         activeKeys = [next.from.key, next.to.key];
         uniforms.mapA.value = a.map;
         uniforms.mapB.value = b.map;
@@ -412,6 +489,8 @@ export default function Globe({
           next.heat === 0 &&
           next.dry === 0 &&
           next.ice === 0;
+        const previousMap = material.map;
+        const previousBump = material.bumpMap;
         material.map = exactModern
           ? next.from.key === 'modern'
             ? a.map
@@ -420,25 +499,33 @@ export default function Globe({
         material.bumpMap =
           exactModern && modernRelief ? modernRelief : terrainRelief;
         material.bumpScale = exactModern ? 0.025 : 0.012;
+        if (previousMap !== material.map || previousBump !== material.bumpMap)
+          material.needsUpdate = true;
         ready = true;
         setLoading(false);
         setError(false);
         evict();
+        requestAnimationFrame(startBackground);
       } catch {
         if (!disposed && id === generation) {
           setError(true);
           setLoading(false);
         }
       } finally {
-        pending = false;
+        if (id === generation) pending = false;
       }
     };
-    const update = (y: number) => {
+    const update = (y: number, immediate = false) => {
       desiredPosition = surfaceAt(y).position;
       travelSpeed = Math.max(
         0.6,
         Math.abs(desiredPosition - displayedPosition) / 2.4,
       );
+      if (immediate) {
+        generation++;
+        void setSurface(desiredPosition, true);
+        return;
+      }
       if (!ready && !pending) void setSurface(desiredPosition);
     };
     api.current = { update, camera, controls, globe };
@@ -509,6 +596,8 @@ export default function Globe({
     renderer.domElement.addEventListener('webglcontextlost', lost);
     return () => {
       disposed = true;
+      assets.dispose();
+      retryTextures.current = () => {};
       generation++;
       api.current = null;
       cancelAnimationFrame(frame);
@@ -530,8 +619,10 @@ export default function Globe({
     };
   }, []);
   useEffect(() => {
-    api.current?.update(year);
-  }, [year]);
+    const immediate = lastJump.current !== jump;
+    lastJump.current = jump;
+    api.current?.update(year, immediate);
+  }, [year, jump]);
   useEffect(() => {
     const a = api.current;
     if (!a) return;
@@ -548,39 +639,70 @@ export default function Globe({
     a.controls.update();
   }, [reset]);
   return (
-    <div
-      className="globe"
-      ref={host}
-      // A canvas-backed interactive scene has no equivalent native image element.
-      // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
-      role="img"
-      aria-label={
-        lang === 'ru' ? 'Интерактивная 3D-модель Земли' : 'Interactive 3D Earth'
-      }
-    >
-      {year >= MAX && (
-        <div className="globe-status engulfed">
-          {lang === 'ru'
-            ? 'Земля поглощена Солнцем'
-            : 'Earth engulfed by the Sun'}
-          <small>
+    <>
+      <div
+        className="globe"
+        ref={host}
+        // A canvas-backed interactive scene has no equivalent native image element.
+        // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
+        role="img"
+        aria-label={
+          lang === 'ru'
+            ? 'Интерактивная 3D-модель Земли'
+            : 'Interactive 3D Earth'
+        }
+      >
+        {year >= MAX && (
+          <div className="globe-status engulfed">
             {lang === 'ru'
-              ? 'Один из сценариев далёкого будущего'
-              : 'One possible far-future outcome'}
-          </small>
+              ? 'Земля поглощена Солнцем'
+              : 'Earth engulfed by the Sun'}
+            <small>
+              {lang === 'ru'
+                ? 'Один из сценариев далёкого будущего'
+                : 'One possible far-future outcome'}
+            </small>
+          </div>
+        )}
+        {year < MAX && (loading || error) && (
+          <div className="globe-status">
+            {error
+              ? lang === 'ru'
+                ? 'Не удалось загрузить поверхность. Сохранён предыдущий вид.'
+                : 'Could not load the surface. The previous view is retained.'
+              : lang === 'ru'
+                ? 'Загружаем поверхность…'
+                : 'Loading the surface…'}
+          </div>
+        )}
+      </div>
+      {preload.total > 0 && preload.done < preload.total && (
+        <div className="texture-preload">
+          <div className="texture-preload-label">
+            <span>{lang === 'ru' ? 'Загружаем эпохи' : 'Loading eras'}</span>
+            <span>{Math.floor((preload.done / preload.total) * 100)}%</span>
+          </div>
+          <progress
+            value={preload.done}
+            max={preload.total}
+            aria-label={lang === 'ru' ? 'Загрузка текстур' : 'Texture loading'}
+          />
+          <p>
+            {preload.failed
+              ? lang === 'ru'
+                ? 'Не все текстуры загрузились.'
+                : 'Some textures could not be loaded.'
+              : lang === 'ru'
+                ? 'Для плавного путешествия дождитесь окончания загрузки.'
+                : 'For a smooth journey, please wait for loading to finish.'}
+          </p>
+          {preload.failed && (
+            <button onClick={() => retryTextures.current()}>
+              {lang === 'ru' ? 'Повторить' : 'Retry'}
+            </button>
+          )}
         </div>
       )}
-      {year < MAX && (loading || error) && (
-        <div className="globe-status">
-          {error
-            ? lang === 'ru'
-              ? 'Не удалось загрузить поверхность. Сохранён предыдущий вид.'
-              : 'Could not load the surface. The previous view is retained.'
-            : lang === 'ru'
-              ? 'Загружаем поверхность…'
-              : 'Loading the surface…'}
-        </div>
-      )}
-    </div>
+    </>
   );
 }

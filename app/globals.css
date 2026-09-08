@@ -1834,3 +1834,59 @@ h1 {
   grid-column: 2;
   justify-self: center;
 }
+
+.texture-preload {
+  position: absolute;
+  z-index: 3;
+  left: 48.5%;
+  bottom: 57px;
+  transform: translateX(-50%);
+  width: 280px;
+  padding: 10px 14px;
+  border: 1px solid #aacfff14;
+  border-radius: 12px;
+  background: #09121bdb;
+  backdrop-filter: blur(12px);
+  color: #9aadc3;
+  font-size: 10px;
+}
+.texture-preload-label {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.texture-preload-label span:last-child {
+  color: #c6ddf4;
+  font-variant-numeric: tabular-nums;
+}
+.texture-preload progress {
+  display: block;
+  appearance: none;
+  width: 100%;
+  height: 3px;
+  border: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #253245;
+  margin: 7px 0;
+}
+.texture-preload progress::-webkit-progress-bar {
+  background: #253245;
+}
+.texture-preload progress::-webkit-progress-value {
+  background: linear-gradient(90deg, #5e98e8, #b4a3ef);
+}
+.texture-preload progress::-moz-progress-bar {
+  background: linear-gradient(90deg, #5e98e8, #b4a3ef);
+}
+.texture-preload p {
+  margin: 0;
+  line-height: 1.5;
+  color: #8194ab;
+}
+.texture-preload button {
+  margin-top: 6px;
+  color: #b4d6ff;
+  text-decoration: underline;
+  cursor: pointer;
+}

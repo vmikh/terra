@@ -34,8 +34,13 @@ const clock = (s: number) =>
 export type NarrationHandle = { startTour: () => void };
 const NarrationPlayer = forwardRef<
   NarrationHandle,
-  { year: number; lang: Lang; onNavigate: (year: number) => void }
->(function NarrationPlayer({ year, lang, onNavigate }, ref) {
+  {
+    year: number;
+    lang: Lang;
+    onNavigate: (year: number) => void;
+    onStartTour: (year: number) => void;
+  }
+>(function NarrationPlayer({ year, lang, onNavigate, onStartTour }, ref) {
   const audio = useRef<HTMLAudioElement>(null),
     continueTour = useRef(false),
     previousLanguage = useRef(lang),
@@ -95,7 +100,7 @@ const NarrationPlayer = forwardRef<
       // Commit the first chapter before play(), within the original user gesture.
       flushSync(() => {
         setTour(true);
-        onNavigate(audioChapters[0].year);
+        onStartTour(audioChapters[0].year);
       });
       const a = audio.current;
       if (a) {

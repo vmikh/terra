@@ -54,6 +54,7 @@ import {
 import { surfaceAt } from './planet-model';
 import { estimatedAt } from './estimates';
 export default function Home() {
+  const [globeJump, setGlobeJump] = useState(0);
   const narrationRef = useRef<NarrationHandle>(null);
   const [lang, setLang] = useState<Lang>('ru'),
     [year, setYear] = useState(NOW),
@@ -348,6 +349,7 @@ export default function Home() {
           ))}
         </aside>
         <Globe
+          jump={globeJump}
           year={year}
           clouds={clouds}
           rotate={rotation}
@@ -582,6 +584,10 @@ export default function Home() {
             year={year}
             lang={lang}
             onNavigate={navigate}
+            onStartTour={(year) => {
+              setGlobeJump((value) => value + 1);
+              navigate(year);
+            }}
           />
           <div className="time-controls">
             <Button
