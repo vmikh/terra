@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   description:
     'Explore 4.54 billion years of Earth’s history and its possible futures. An interactive planetary atlas.',
   metadataBase: new URL(
-    'https://terra-earth-through-time.peppy-grove-6886.chatgpt.site',
+    'https://terra-earth-through-time.vmikh.chatgpt.site',
   ),
   openGraph: {
     title: 'TERRA — Earth through time',
