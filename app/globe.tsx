@@ -28,6 +28,7 @@ export default function Globe({
   const api = useRef<{
     material: THREE.MeshPhongMaterial;
     cloud: THREE.Mesh;
+    ice: THREE.Mesh;
     controls: OrbitControls;
     camera: THREE.PerspectiveCamera;
     globe: THREE.Mesh;
@@ -73,6 +74,17 @@ export default function Globe({
     );
     globe.rotation.y = -1.6;
     scene.add(globe);
+    const ice = new THREE.Mesh(
+      new THREE.SphereGeometry(1.888, 80, 48),
+      new THREE.MeshPhongMaterial({
+        color: 0xdeedf4,
+        transparent: true,
+        opacity: 0.9,
+        shininess: 8,
+      }),
+    );
+    ice.visible = false;
+    globe.add(ice);
     const loader = new THREE.TextureLoader();
     const cloudMaterial = new THREE.MeshPhongMaterial({
       transparent: true,
@@ -127,6 +139,7 @@ export default function Globe({
     api.current = {
       material,
       cloud,
+      ice,
       controls,
       camera,
       globe,
@@ -229,6 +242,7 @@ export default function Globe({
         0.5,
       );
     a.globe.visible = mode !== 'destroyed';
+    a.ice.visible = mode === 'ice';
     a.material.emissive.set(mode === 'hot' ? '#b32d05' : '#000000');
     a.material.emissiveIntensity = mode === 'hot' ? 0.45 : 0;
     a.halo.visible = mode !== 'destroyed';

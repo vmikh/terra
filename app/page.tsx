@@ -125,7 +125,11 @@ export default function Home() {
     if (year < -4400000000)
       return { texture: '/textures/lava.jpg', mode: 'hot', age: null };
     if (year < -750000000)
-      return { texture: 'solid:ocean', mode: 'ocean', age: null };
+      return {
+        texture: 'solid:ocean',
+        mode: year >= -2200000000 && year < -2100000000 ? 'ice' : 'ocean',
+        age: null,
+      };
     if (year >= 2000002026)
       return {
         texture: '/textures/lava.jpg',
@@ -154,7 +158,11 @@ export default function Home() {
               );
       return {
         texture: `/textures/paleo/${age}.jpg`,
-        mode: year >= -720000000 && year < -635000000 ? 'ice' : 'ancient',
+        mode:
+          (year >= -720000000 && year < -660000000) ||
+          (year >= -650000000 && year < -635000000)
+            ? 'ice'
+            : 'ancient',
         age,
       };
     }
@@ -190,22 +198,27 @@ export default function Home() {
       ? '0'
       : '—';
   const mapNote =
-    map.mode === 'modern'
-      ? t('Современная география · NASA', 'Modern geography · NASA')
-      : year >= 250002026 && year < 1000002026
-        ? t(
-            'Пангея Ультима · оцифровка модели +250 млн лет',
-            'Pangaea Ultima · digitised +250 Myr model',
-          )
-        : map.age !== null
+    map.mode === 'ice'
+      ? t(
+          'Схематичный ледяной покров · границы неопределённы',
+          'Schematic ice cover · uncertain boundaries',
+        )
+      : map.mode === 'modern'
+        ? t('Современная география · NASA', 'Modern geography · NASA')
+        : year >= 250002026 && year < 1000002026
           ? t(
-              `PALEOMAP · срез ${map.age === 1 ? 'ледникового максимума' : map.age + ' млн лет назад'}`,
-              `PALEOMAP · ${map.age === 1 ? 'Last Glacial Maximum' : map.age + ' million years ago'}`,
+              'Пангея Ультима · оцифровка модели +250 млн лет',
+              'Pangaea Ultima · digitised +250 Myr model',
             )
-          : t(
-              'Схематический вид · география неизвестна',
-              'Schematic view · geography unknown',
-            );
+          : map.age !== null
+            ? t(
+                `PALEOMAP · срез ${map.age === 1 ? 'ледникового максимума' : map.age + ' млн лет назад'}`,
+                `PALEOMAP · ${map.age === 1 ? 'Last Glacial Maximum' : map.age + ' million years ago'}`,
+              )
+            : t(
+                'Схематический вид · география неизвестна',
+                'Schematic view · geography unknown',
+              );
   const estimate =
     year === NOW
       ? t('ВЫ ЗДЕСЬ · НАСТОЯЩЕЕ', 'YOU ARE HERE · THE PRESENT')
