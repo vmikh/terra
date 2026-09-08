@@ -67,3 +67,7 @@ TypeScript, production compilation, 10,001 sampled timeline positions, chronolog
 The player offers play/pause, seeking, chapter selection, previous/next, playback rates 0.75x-2x with pitch preservation, and optional advancement after a chapter ends. Manual timeline navigation and language changes pause/reset narration. No initial autoplay. The former six-second automatic tour is replaced by narration-paced advancement. Manual year entry and the logo subtitle are removed.
 
 Scripts live in `content/narration.json`. To resume generation after adding credits: `node --env-file=.env.elevenlabs.local scripts/generate-narration.mjs`. Existing audio is retained. The ignored local key file must never be bundled or committed. `content/audio-availability.json` is refreshed after each batch; unavailable recordings are disabled instead of generating broken requests. Narration credit appears in the sources dialog.
+
+## Vercel deployment
+
+`vercel.json` selects `npm run build:vercel` and publishes `dist/client`. This build sets `TERRA_STATIC_EXPORT=1`, disables the Cloudflare/Sites runtime plugins, and prerenders the application to HTML. The simulator, textures and audio run entirely in the browser; no serverless adapter or ElevenLabs key is needed on Vercel. Default `npm run dev` and the Cloudflare build remain available. Node is pinned to the 22.x major line. Static-export social metadata uses https://terra-sim.vercel.app.

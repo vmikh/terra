@@ -17,7 +17,9 @@ export const metadata: Metadata = {
   description:
     'Explore 4.54 billion years of Earth’s history and its possible futures. An interactive planetary atlas.',
   metadataBase: new URL(
-    'https://terra-earth-through-time.vmikh.chatgpt.site',
+    process.env.TERRA_STATIC_EXPORT === '1'
+      ? 'https://terra-sim.vercel.app'
+      : 'https://terra-earth-through-time.vmikh.chatgpt.site',
   ),
   openGraph: {
     title: 'TERRA — Earth through time',
