@@ -1460,3 +1460,377 @@ h1 {
     bottom: 62px;
   }
 }
+/* Nested controls follow the radius of their inset, not the outer edge. */
+.language {
+  border-radius: 10px;
+}
+.language button {
+  border-radius: 6px;
+}
+.view-controls {
+  border-radius: 9px;
+}
+.view-controls button {
+  border-radius: 5px;
+}
+.scenario-picker {
+  border-radius: 10px;
+}
+.scenario-buttons button {
+  border-radius: 5px;
+}
+.climate-legend small {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+.climate-legend small span {
+  float: none;
+}
+.stat-number.inferred,
+.detail-grid .inferred,
+.detail-content .inferred {
+  color: #8490a0;
+}
+.stat .inference-note {
+  color: #8592a3;
+}
+
+.globe-status.engulfed {
+  top: 50%;
+  transform: translateY(-50%);
+  color: #ffd3ad;
+  font-size: 24px;
+  text-align: center;
+  background: radial-gradient(ellipse, #d65e2020, transparent 70%);
+  padding: 80px;
+}
+.globe-status.engulfed small {
+  display: block;
+  color: #b59c8b;
+  font-size: 14px;
+  margin-top: 14px;
+}
+.light-sources a {
+  color: #87bdeb;
+  text-underline-offset: 3px;
+}
+
+/* Local narration: one recording at a time; independent of time-slider speed. */
+.narration-player {
+  width: 440px;
+  position: relative;
+  padding: 9px 12px;
+  border: 1px solid #ffffff18;
+  border-radius: 12px;
+  background: linear-gradient(120deg, #152333, #101923);
+}
+.narration-heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #94abc5;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+.narration-heading > span {
+  white-space: nowrap;
+}
+.narration-player select {
+  color: #dbe8f8;
+  background: #142130;
+  border: 0;
+  border-radius: 5px;
+  font: inherit;
+  cursor: pointer;
+}
+.narration-heading select {
+  min-width: 0;
+  flex: 1;
+  font-size: 13px;
+  letter-spacing: 0;
+  text-overflow: ellipsis;
+}
+.narration-controls {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 6px;
+}
+.time-controls .narration-controls button {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  width: 25px;
+  height: 26px;
+  background: transparent;
+  border: 0;
+}
+.time-controls .narration-controls .narration-play {
+  background: #324b68;
+  border-radius: 6px;
+  color: #edf5ff;
+  width: 30px;
+}
+.narration-controls > input[type='range'] {
+  width: 74px;
+  min-width: 40px;
+  flex: 1;
+  accent-color: #8bb9f0;
+  cursor: pointer;
+}
+.narration-time {
+  font-size: 11px;
+  color: #9cafc6;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.narration-controls .narration-rate {
+  font-size: 12px;
+  width: 56px;
+  height: 26px;
+}
+.narration-tour {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  color: #9cafc6;
+  cursor: pointer;
+}
+.narration-tour input {
+  accent-color: #8bb9f0;
+}
+.narration-error {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  background: #2b2025;
+  color: #ffc6b8;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+.narration-player :focus-visible {
+  outline: 2px solid #9bc5fa;
+  outline-offset: 2px;
+}
+.narration-player button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.time-controls {
+  align-items: center;
+}
+.timeline-top {
+  margin-bottom: 12px;
+}
+.date-block .date-button {
+  cursor: default;
+}
+.quick-jumps {
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 410px;
+}
+.narration-unavailable {
+  display: block;
+  margin-top: 4px;
+  color: #91a1b6;
+  font-size: 11px;
+}
+.narration-credit {
+  color: #95acc6;
+  font-size: 13px;
+}
+.narration-credit a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Symmetric columns keep narration centred on the timeline, regardless of date length. */
+.timeline-top {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 460px minmax(0, 1fr);
+  gap: 18px;
+}
+.timeline-top > .narration-player {
+  width: 100%;
+}
+.timeline-top > .time-controls {
+  justify-self: end;
+  gap: 10px;
+}
+.timeline-bottom .quick-jumps {
+  margin: 0;
+  max-width: none;
+  flex-wrap: nowrap;
+}
+.timeline-bottom .quick-jumps button {
+  font-size: 11px;
+}
+.narration-controls button {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  width: 25px;
+  height: 28px;
+  background: transparent;
+  border: 0;
+  color: #a9bed7;
+  cursor: pointer;
+}
+.narration-controls .narration-play {
+  background: #324b68;
+  border-radius: 6px;
+  color: #edf5ff;
+  width: 32px;
+}
+.narration-heading .chapter-select {
+  flex: 1;
+  min-width: 0;
+  height: 30px;
+  border: 1px solid #ffffff12;
+  border-radius: 7px;
+  padding: 0 9px;
+  background: #ffffff05;
+  color: #e1ebf8;
+  font-size: 13px;
+  letter-spacing: 0;
+  cursor: pointer;
+}
+.chapter-select [data-slot='select-value'] {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.narration-controls .narration-rate {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 6px;
+  width: 65px;
+  height: 28px;
+  border: 1px solid #ffffff16;
+  border-radius: 6px;
+  background: #1a2a3e;
+  color: #dbeaff;
+  font-size: 12px;
+}
+.narration-menu {
+  background: linear-gradient(145deg, #1b2b40, #101b29);
+  color: #dce9fa;
+  border: 1px solid #91b4df30;
+  border-radius: 12px;
+  padding: 6px;
+  box-shadow: 0 18px 65px #0009;
+  max-height: min(400px, var(--available-height));
+  min-width: 325px;
+}
+.narration-menu [data-slot='select-item'] {
+  padding: 9px 30px 9px 10px;
+  border-radius: 7px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.narration-menu [data-slot='select-item'][data-highlighted],
+.narration-menu [data-slot='select-item'][data-selected] {
+  background: #80b2ef1c;
+  color: #f0f6ff;
+}
+.narration-menu .chapter-option-number {
+  color: #7894b5;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  margin-right: 7px;
+}
+.narration-menu.rate-menu {
+  min-width: 100px;
+}
+.narration-tour {
+  position: relative;
+  gap: 5px;
+  padding-left: 3px;
+}
+.narration-tour input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.tour-switch {
+  display: block;
+  width: 28px;
+  height: 16px;
+  background: #29394c;
+  border: 1px solid #ffffff1a;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+.tour-switch::after {
+  content: '';
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin: 2px;
+  background: #90a3bb;
+  transition:
+    transform 0.2s,
+    background 0.2s;
+}
+.narration-tour input:checked + .tour-switch {
+  background: #518bd0;
+  border-color: #8ec0ff80;
+}
+.narration-tour input:checked + .tour-switch::after {
+  transform: translateX(12px);
+  background: white;
+}
+.narration-tour input:focus-visible + .tour-switch {
+  outline: 2px solid #b4d6ff;
+  outline-offset: 3px;
+}
+.time-controls .full-story-button {
+  height: 40px;
+  padding: 0 15px;
+  border: 1px solid #b7dcff70;
+  border-radius: 9px;
+  background: linear-gradient(115deg, #568aca, #7866c0);
+  color: #fff;
+  box-shadow: 0 3px 20px #528ad52b;
+  font-size: 13px;
+  font-weight: 500;
+  transition:
+    filter 0.2s,
+    box-shadow 0.2s;
+}
+.time-controls .full-story-button:hover {
+  filter: brightness(1.14);
+  box-shadow: 0 4px 25px #739bee55;
+}
+.full-story-button svg {
+  width: 17px;
+  height: 17px;
+}
+
+/* Both navigation groups share the viewport's centre axis. */
+.topbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 460px minmax(0, 1fr);
+  column-gap: 18px;
+}
+.topbar > .brand {
+  justify-self: start;
+}
+.topbar > .topnav {
+  grid-column: 2;
+  justify-self: center;
+}
+.topbar > .language {
+  justify-self: end;
+}
+.timeline-top > .narration-player {
+  grid-column: 2;
+  justify-self: center;
+}

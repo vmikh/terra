@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import {
   ArrowUpRight,
   Thermometer,
@@ -11,22 +11,18 @@ import {
   Minus,
   Sparkles,
   ChevronRight,
-  ChevronLeft,
-  Play,
-  Pause,
   BookOpen,
   Orbit,
   Info,
   Cloud,
   Compass,
-  ArrowRight,
   Search,
   Check,
   Clock3,
   Maximize2,
   Minimize2,
   Leaf,
-  TrendingUp,
+  Headphones,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -38,6 +34,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import Globe from './globe';
+import NarrationPlayer, { type NarrationHandle } from './narration-player';
 import {
   NOW,
   MIN,
@@ -54,21 +51,18 @@ import {
   sources,
   type Lang,
 } from './epochs';
-import paleoAges from './paleo-ages.json';
+import { surfaceAt } from './planet-model';
+import { estimatedAt } from './estimates';
 export default function Home() {
+  const narrationRef = useRef<NarrationHandle>(null);
   const [lang, setLang] = useState<Lang>('ru'),
     [year, setYear] = useState(NOW),
-    [playing, setPlaying] = useState(false),
     [rotation, setRotation] = useState(true),
     [clouds, setClouds] = useState(true),
     [zoom, setZoom] = useState(0),
     [reset, setReset] = useState(0),
     [scenario, setScenario] = useState(1),
-    [modal, setModal] = useState<
-      'sources' | 'epochs' | 'year' | 'details' | null
-    >(null),
-    [inputYear, setInputYear] = useState(String(NOW)),
-    [inputError, setInputError] = useState(''),
+    [modal, setModal] = useState<'sources' | 'epochs' | 'details' | null>(null),
     [search, setSearch] = useState(''),
     [full, setFull] = useState(false),
     [view, setView] = useState<'natural' | 'climate'>('natural');
@@ -83,7 +77,6 @@ export default function Home() {
   const number = (n: number, d = 2) =>
     new Intl.NumberFormat(lang, { maximumFractionDigits: d }).format(n);
   const navigate = (y: number) => {
-    setPlaying(false);
     setYear(Math.max(MIN, Math.min(MAX, Math.round(y))));
   };
   useEffect(() => {
@@ -101,74 +94,14 @@ export default function Home() {
     );
   }, [lang]);
   useEffect(() => {
-    if (!playing) return;
-    const timer = setInterval(
-      () =>
-        setYear((y) => {
-          const i = epochs.findIndex((e) => e.year > y);
-          if (i === -1) {
-            setPlaying(false);
-            return y;
-          }
-          return epochs[i].year;
-        }),
-      6000,
-    );
-    return () => clearInterval(timer);
-  }, [playing]);
-  useEffect(() => {
     const fn = () => setFull(!!document.fullscreenElement);
     document.addEventListener('fullscreenchange', fn);
     return () => document.removeEventListener('fullscreenchange', fn);
   }, []);
-  const map = useMemo(() => {
-    if (year < -4400000000)
-      return { texture: '/textures/lava.jpg', mode: 'hot', age: null };
-    if (year < -750000000)
-      return {
-        texture: 'solid:ocean',
-        mode: year >= -2200000000 && year < -2100000000 ? 'ice' : 'ocean',
-        age: null,
-      };
-    if (year >= 2000002026)
-      return {
-        texture: '/textures/lava.jpg',
-        mode: year >= MAX ? 'destroyed' : 'hot',
-        age: null,
-      };
-    if (year >= 1000002026)
-      return { texture: 'solid:barren', mode: 'barren', age: null };
-    if (year >= 250002026)
-      return { texture: '/textures/future.jpg', mode: 'ancient', age: 250 };
-    if (year >= 1002026)
-      return { texture: 'solid:ocean', mode: 'ocean', age: null };
-    if (year <= -9700) {
-      const age =
-        year >= -24000
-          ? 1
-          : paleoAges
-              .filter((a) => a !== 1)
-              .reduce(
-                (a, b) =>
-                  Math.abs(b - (NOW - year) / 1e6) <
-                  Math.abs(a - (NOW - year) / 1e6)
-                    ? b
-                    : a,
-                750,
-              );
-      return {
-        texture: `/textures/paleo/${age}.jpg`,
-        mode:
-          (year >= -720000000 && year < -660000000) ||
-          (year >= -650000000 && year < -635000000)
-            ? 'ice'
-            : 'ancient',
-        age,
-      };
-    }
-    return { texture: '/textures/earth.jpg', mode: 'modern', age: 0 };
-  }, [year]);
-  const pop = populationAt(year),
+  const map = useMemo(() => surfaceAt(year), [year]);
+  const inferred = estimatedAt(year);
+  const rawPop = populationAt(year),
+    pop = inferred.population,
     popValue =
       pop === null
         ? '—'
@@ -189,36 +122,43 @@ export default function Home() {
       ? '15.10'
       : year >= 2025 && year <= NOW
         ? '14.97'
-        : epoch.temp;
+        : epoch.temp === '—'
+          ? '≈' + number(inferred.temperature, 1)
+          : epoch.temp;
   const temperatureText =
     lang === 'ru' ? temperature.replace(/\./g, ',') : temperature;
-  const ocean = modern
-    ? '71'
-    : year < -4400000000 || year >= 2000002026
-      ? '0'
-      : '—';
+  const oceanInferred = !modern;
+  const ocean = modern ? '71' : '≈' + number(inferred.ocean, 1);
+  const oxygenInferred = epoch.oxygen === '—';
+  const oxygen = oxygenInferred
+    ? '≈' + number(inferred.oxygen, 2)
+    : lang === 'ru'
+      ? epoch.oxygen.replace('.', ',')
+      : epoch.oxygen;
+  const reconstructionNote = t(
+    'ИИ-реконструкция · ненадёжные данные',
+    'AI reconstruction · uncertain data',
+  );
   const mapNote =
-    map.mode === 'ice'
+    year >= MAX
       ? t(
-          'Схематичный ледяной покров · границы неопределённы',
-          'Schematic ice cover · uncertain boundaries',
+          'Земля поглощена Солнцем · возможный сценарий',
+          'Earth engulfed by the Sun · possible scenario',
         )
-      : map.mode === 'modern'
-        ? t('Современная география · NASA', 'Modern geography · NASA')
-        : year >= 250002026 && year < 1000002026
+      : map.modern === 1
+        ? t(
+            'NASA · поверхность 8K · огни по эпохе',
+            'NASA · 8K surface · lights by era',
+          )
+        : map.inferred
           ? t(
-              'Пангея Ультима · оцифровка модели +250 млн лет',
-              'Pangaea Ultima · digitised +250 Myr model',
+              'ИИ-реконструкция географии · условные переходы',
+              'AI geography reconstruction · illustrative transitions',
             )
-          : map.age !== null
-            ? t(
-                `PALEOMAP · срез ${map.age === 1 ? 'ледникового максимума' : map.age + ' млн лет назад'}`,
-                `PALEOMAP · ${map.age === 1 ? 'Last Glacial Maximum' : map.age + ' million years ago'}`,
-              )
-            : t(
-                'Схематический вид · география неизвестна',
-                'Schematic view · geography unknown',
-              );
+          : t(
+              'PALEOMAP · интерполяция берегов, условный рельеф',
+              'PALEOMAP · interpolated coasts, illustrative relief',
+            );
   const estimate =
     year === NOW
       ? t('ВЫ ЗДЕСЬ · НАСТОЯЩЕЕ', 'YOU ARE HERE · THE PRESENT')
@@ -235,34 +175,6 @@ export default function Home() {
       ...(nearFuture ? ['ipcc', 'un'] : []),
     ]),
   ];
-  const inputSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const cleaned = inputYear.replace(/[\s,]/g, '').replace('−', '-');
-    const v = Number(cleaned);
-    if (
-      !cleaned ||
-      !/^[-+]?\d+$/.test(cleaned) ||
-      !Number.isSafeInteger(v) ||
-      v < MIN ||
-      v > MAX ||
-      v === 0
-    ) {
-      setInputError(
-        t(
-          'Введите целый год от −4 540 000 000 до 7 600 002 026. Года 0 в этой шкале нет.',
-          'Enter an integer year from −4,540,000,000 to 7,600,002,026. This scale has no year 0.',
-        ),
-      );
-      return;
-    }
-    navigate(v);
-    setModal(null);
-  };
-  const openYear = () => {
-    setInputYear(String(year));
-    setInputError('');
-    setModal('year');
-  };
   const toggleFullscreen = async () => {
     try {
       if (document.fullscreenElement) await document.exitFullscreen();
@@ -281,23 +193,25 @@ export default function Home() {
       icon: Thermometer,
       title: t('Средняя температура', 'Mean surface temperature'),
       value: temperatureText,
-      unit: temperature === '—' ? '' : '°C',
+      unit: '°C',
+      inferred: !nearFuture && inferred.inferredTemperature,
       note: nearFuture
         ? `${scenarios[scenario].ssp} · ${t('сценарная оценка', 'scenario estimate')}`
         : year >= 2025 && year <= NOW
           ? t('Последний полный год · 2025', 'Latest complete year · 2025')
-          : temperature === '—'
-            ? t('Надёжной оценки нет', 'No reliable estimate')
+          : inferred.inferredTemperature
+            ? reconstructionNote
             : t('Ориентир для эпохи', 'Approximate epoch value'),
     },
     {
       icon: Users,
       title: t('Население людей', 'Human population'),
-      value: popValue,
+      value: (rawPop === null ? '≈' : '') + popValue,
+      inferred: rawPop === null,
       unit: popUnit,
       note:
-        pop === null
-          ? t('Надёжной оценки нет', 'No reliable estimate')
+        rawPop === null
+          ? reconstructionNote
           : pop === 0
             ? t('Homo sapiens ещё нет', 'Homo sapiens has not appeared')
             : future
@@ -313,31 +227,31 @@ export default function Home() {
       icon: Waves,
       title: t('Покрытие океаном', 'Ocean coverage'),
       value: ocean,
-      unit: ocean === '—' ? '' : '%',
-      note:
-        ocean === '—'
-          ? t('Глобальная доля не определена', 'Global fraction not specified')
-          : year >= 2000002026
-            ? t('Сценарий потери океанов', 'Ocean-loss scenario')
-            : t('Доля поверхности', 'Fraction of the surface'),
+      unit: '%',
+      inferred: oceanInferred,
+      note: oceanInferred
+        ? reconstructionNote
+        : year >= 2000002026
+          ? t('Сценарий потери океанов', 'Ocean-loss scenario')
+          : t('Доля поверхности', 'Fraction of the surface'),
     },
     {
       icon: Wind,
       title: t('Кислород в атмосфере', 'Atmospheric oxygen'),
-      value: lang === 'ru' ? epoch.oxygen.replace('.', ',') : epoch.oxygen,
-      unit: epoch.oxygen === '—' ? '' : '%',
-      note:
-        epoch.oxygen === '—'
-          ? t('Высокая неопределённость', 'High uncertainty')
-          : t(
-              'Объёмная доля · ориентир эпохи',
-              'Volume fraction · epoch estimate',
-            ),
+      value: oxygen,
+      unit: '%',
+      inferred: oxygenInferred,
+      note: oxygenInferred
+        ? reconstructionNote
+        : t(
+            'Объёмная доля · ориентир эпохи',
+            'Volume fraction · epoch estimate',
+          ),
     },
   ];
   return (
     <main
-      className={`observatory ${future ? 'future' : ''} ${map.mode === 'hot' || map.mode === 'destroyed' ? 'hot-world' : ''}`}
+      className={`observatory ${future ? 'future' : ''} ${map.heat > 0.45 ? 'hot-world' : ''}`}
     >
       <header className="topbar">
         <a className="brand" href="/" aria-label="Terra">
@@ -345,7 +259,6 @@ export default function Home() {
           <span>
             TERRA<span className="brand-dot">.</span>
           </span>
-          <small>{t('ИСТОРИЯ ОДНОЙ ПЛАНЕТЫ', 'THE STORY OF ONE PLANET')}</small>
         </a>
         <nav className="topnav">
           <Button
@@ -423,18 +336,19 @@ export default function Home() {
                 <Info className="stat-info" />
               </div>
               <div
-                className={`stat-number ${s.value.length > 6 ? 'compact-number' : ''}`}
+                className={`stat-number ${s.value.length > 6 ? 'compact-number' : ''} ${s.inferred ? 'inferred' : ''}`}
               >
                 {s.value}
                 <small>{s.unit}</small>
               </div>
-              <p>{s.note}</p>
+              <p className={s.inferred ? 'inference-note' : undefined}>
+                {s.note}
+              </p>
             </button>
           ))}
         </aside>
         <Globe
-          texture={map.texture}
-          mode={map.mode}
+          year={year}
           clouds={clouds}
           rotate={rotation}
           zoom={zoom}
@@ -585,10 +499,9 @@ export default function Home() {
             size="icon"
             onClick={() => setClouds((v) => !v)}
             aria-pressed={clouds}
-            disabled={!modern}
             title={t('Показать облака', 'Show clouds')}
             aria-label={t('Показать облака', 'Show clouds')}
-            className={clouds && modern ? 'active' : ''}
+            className={clouds ? 'active' : ''}
           >
             <Cloud />
           </Button>
@@ -657,81 +570,27 @@ export default function Home() {
             <span className="section-label">
               {t('ПУТЕШЕСТВИЕ ВО ВРЕМЕНИ', 'A JOURNEY THROUGH TIME')}
             </span>
-            <button
-              className="date-button"
-              onClick={openYear}
-              title={t('Ввести год вручную', 'Enter a year')}
-            >
+            <div className="date-button">
               <h3>
                 {date.value}
                 <small>{date.unit}</small>
               </h3>
-              <ChevronRight />
-            </button>
-          </div>
-          <div className="quick-jumps">
-            {[
-              [-4540000000, t('Рождение', 'Birth')],
-              [-299000000, t('Пангея', 'Pangaea')],
-              [-66000000, t('Астероид', 'Asteroid')],
-              [2100, t('2100 год', 'Year 2100')],
-              [MAX, t('Последняя глава', 'Final chapter')],
-            ].map(([y, label]) => (
-              <Button
-                key={y}
-                variant="ghost"
-                onClick={() => navigate(Number(y))}
-              >
-                {label}
-              </Button>
-            ))}
-          </div>
-          <div className="time-controls">
-            <Button variant="outline" className="year-entry" onClick={openYear}>
-              {t('Ввести год', 'Enter year')}
-              <ArrowRight />
-            </Button>
-            <div className="playback">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => navigate(epochs[Math.max(0, index - 1)].year)}
-                disabled={year === MIN}
-                aria-label={t('Предыдущая эпоха', 'Previous epoch')}
-              >
-                <ChevronLeft />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label={
-                  playing
-                    ? t('Пауза', 'Pause')
-                    : t('Путешествие по эпохам', 'Play epoch tour')
-                }
-                title={t(
-                  'Автопереход каждые 6 секунд',
-                  'Advance every 6 seconds',
-                )}
-                onClick={() => {
-                  if (year === MAX) setYear(MIN);
-                  setPlaying((p) => !p);
-                }}
-              >
-                {playing ? <Pause /> : <Play />}
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() =>
-                  navigate(epochs[Math.min(epochs.length - 1, index + 1)].year)
-                }
-                disabled={year === MAX}
-                aria-label={t('Следующая эпоха', 'Next epoch')}
-              >
-                <ChevronRight />
-              </Button>
             </div>
+          </div>
+          <NarrationPlayer
+            ref={narrationRef}
+            year={year}
+            lang={lang}
+            onNavigate={navigate}
+          />
+          <div className="time-controls">
+            <Button
+              className="full-story-button"
+              onClick={() => narrationRef.current?.startTour()}
+            >
+              <Headphones />
+              {t('Слушать всю историю', 'Listen to the full story')}
+            </Button>
             <Button
               variant="outline"
               className="now-button"
@@ -832,13 +691,28 @@ export default function Home() {
           <span>
             {t('НЕЛИНЕЙНАЯ ШКАЛА', 'NONLINEAR SCALE')}
             <span className="thin-dot">·</span>
-            {playing
-              ? t('АВТОПЕРЕХОД · 6 СЕК', 'AUTO-ADVANCE · 6 SEC')
-              : t(
-                  `${epochs.length} ЭПОХ · ОТ РОЖДЕНИЯ ДО ФИНАЛА`,
-                  `${epochs.length} EPOCHS · FROM ORIGIN TO FINALE`,
-                )}
+            {t(
+              `${epochs.length} ЭПОХ · 15 АУДИОГЛАВ`,
+              `${epochs.length} EPOCHS · 15 AUDIO CHAPTERS`,
+            )}
           </span>
+          <div className="quick-jumps">
+            {[
+              [-4540000000, t('Рождение', 'Birth')],
+              [-299000000, t('Пангея', 'Pangaea')],
+              [-66000000, t('Астероид', 'Asteroid')],
+              [2100, t('2100 год', 'Year 2100')],
+              [MAX, t('Последняя глава', 'Final chapter')],
+            ].map(([y, label]) => (
+              <Button
+                key={y}
+                variant="ghost"
+                onClick={() => navigate(Number(y))}
+              >
+                {label}
+              </Button>
+            ))}
+          </div>
           <button onClick={() => setModal('sources')}>
             {t('ДАННЫЕ', 'DATA')}: NASA · IPCC · {t('ООН', 'UN')} · PALEOMAP
             <ArrowUpRight />
@@ -851,72 +725,25 @@ export default function Home() {
           if (!open) setModal(null);
         }}
       >
-        <DialogContent
-          className={`terra-dialog ${modal === 'year' ? 'year-dialog' : ''}`}
-        >
+        <DialogContent className="terra-dialog">
           <DialogTitle>
-            {modal === 'year'
-              ? t('В какой год отправимся?', 'Which year shall we visit?')
-              : modal === 'epochs'
-                ? t('Атлас времени', 'An atlas of time')
-                : modal === 'details'
-                  ? t(
-                      'За каждым числом — контекст',
-                      'Every number has a context',
-                    )
-                  : t(
-                      'Наука за путешествием',
-                      'The science behind the journey',
-                    )}
+            {modal === 'epochs'
+              ? t('Атлас времени', 'An atlas of time')
+              : modal === 'details'
+                ? t('За каждым числом — контекст', 'Every number has a context')
+                : t('Наука за путешествием', 'The science behind the journey')}
           </DialogTitle>
           <DialogDescription>
-            {modal === 'year'
+            {modal === 'epochs'
               ? t(
-                  'От формирования планеты до возможного поглощения Солнцем.',
-                  'From planetary formation to possible solar engulfment.',
+                  `${epochs.length} коротких глав о нашем единственном доме.`,
+                  `${epochs.length} short chapters about our only home.`,
                 )
-              : modal === 'epochs'
-                ? t(
-                    `${epochs.length} коротких глав о нашем единственном доме.`,
-                    `${epochs.length} short chapters about our only home.`,
-                  )
-                : t(
-                    'Наблюдения, реконструкции и сценарии — с обозначенными границами знания.',
-                    'Observations, reconstructions and scenarios, with their limits made explicit.',
-                  )}
-          </DialogDescription>
-          {modal === 'year' && (
-            <form onSubmit={inputSubmit} className="year-form">
-              <label htmlFor="year-input">{t('Год', 'Year')}</label>
-              <Input
-                id="year-input"
-                autoFocus
-                inputMode="text"
-                value={inputYear}
-                onChange={(e) => {
-                  setInputYear(e.target.value);
-                  setInputError('');
-                }}
-                aria-invalid={!!inputError}
-                aria-describedby="year-help"
-              />
-              <p id="year-help">
-                {t(
-                  'Отрицательные числа — до н. э. Например: −66000000 — время астероида; 1880 — электрический век; 2100 — будущее. Миллионы лет на шкале отсчитываются от 2026.',
-                  'Negative numbers mean BCE. Examples: −66000000 for the asteroid, 1880 for the electrical age, 2100 for the future. Million-year offsets are measured from 2026.',
+              : t(
+                  'Наблюдения, реконструкции и сценарии — с обозначенными границами знания.',
+                  'Observations, reconstructions and scenarios, with their limits made explicit.',
                 )}
-              </p>
-              {inputError && (
-                <p className="input-error" role="alert">
-                  {inputError}
-                </p>
-              )}
-              <Button type="submit">
-                {t('Переместиться', 'Travel to year')}
-                <ArrowRight />
-              </Button>
-            </form>
-          )}
+          </DialogDescription>
           {modal === 'epochs' && (
             <>
               <div className="epoch-search">
@@ -971,18 +798,26 @@ export default function Home() {
                   <div key={s.title}>
                     <s.icon />
                     <small>{s.title}</small>
-                    <strong>
+                    <strong className={s.inferred ? 'inferred' : undefined}>
                       {s.value} {s.unit}
                     </strong>
-                    <p>{s.note}</p>
+                    <p className={s.inferred ? 'inference-note' : undefined}>
+                      {s.note}
+                    </p>
                   </div>
                 ))}
               </div>
               <dl>
                 <div>
                   <dt>CO₂</dt>
-                  <dd>
-                    {epoch.co2} {epoch.co2 === '—' ? '' : 'ppm'}
+                  <dd className={epoch.co2 === '—' ? 'inferred' : undefined}>
+                    {epoch.co2 === '—'
+                      ? '≈' + number(inferred.co2, 0)
+                      : epoch.co2}{' '}
+                    ppm{' '}
+                    {epoch.co2 === '—' && (
+                      <small className="inferred">{reconstructionNote}</small>
+                    )}
                   </dd>
                 </div>
                 <div>
@@ -1018,8 +853,8 @@ export default function Home() {
               </dl>
               <p className="method-note">
                 {t(
-                  '«—» означает, что надёжное значение не задано, а не ноль. Исторические численности округлены и интерполированы между опорными годами. Температуры древних эпох — обзорные ориентиры. Для 2026 показана температура 2025: полный год ещё не завершён.',
-                  '“—” means a reliable value is not specified, not zero. Historical population is rounded and interpolated between anchor years. Ancient temperatures are broad guides. The 2026 view uses 2025 temperature because the full year is not yet complete.',
+                  'Серые числа со знаком ≈ — ИИ-реконструкция, а не научные измерения. Пропуски заполнены интерполяцией и условными опорными значениями. После 2100 население показано как условный сценарий снижения, а не прогноз ООН: действительное будущее неизвестно. Для 2026 используется температура полного 2025 года.',
+                  'Grey values marked ≈ are AI reconstructions, not scientific measurements. Gaps use interpolation and hypothetical anchor values. Population after 2100 is an illustrative declining scenario, not a UN forecast; the actual future is unknown. The 2026 view uses the complete 2025 temperature.',
                 )}
               </p>
               <Button variant="outline" onClick={() => setModal('sources')}>
@@ -1041,18 +876,61 @@ export default function Home() {
                   </h4>
                   <p>
                     {t(
-                      'Ползунок выбирает год, текст — соответствующую главу, география — ближайший опубликованный срез. Древние даты округлены. Облака и освещение иллюстративны. До 750 млн лет назад и в большей части далёкого будущего география не восстанавливается уверенно: вместо выдуманных материков показана схема.',
-                      'The slider selects a year, text follows its chapter, and geography uses the nearest published slice. Ancient dates are rounded. Clouds and lighting are illustrative. Before 750 million years ago and through much of the deep future, geography is uncertain: a schematic replaces invented continents.',
+                      'Береговые линии плавно интерполируются между картами PALEOMAP; фактура рельефа стилизована под современную Землю. До 750 млн лет назад и в далёком будущем участки суши условные: это ИИ-реконструкция, не восстановленная тектоника. Уменьшение льда, высыхание океанов и нагрев плавно меняют одну и ту же модель.',
+                      'Coastlines interpolate smoothly between PALEOMAP maps; relief textures are styled to match modern Earth. Before 750 million years ago and in the deep future, land is hypothetical: an AI reconstruction, not recovered tectonics. Ice retreat, ocean loss and heating gradually change the same globe.',
                     )}
                   </p>
                   <p>
                     {t(
-                      'В XXI веке берега сохраняют современную геометрию: метровый подъём моря неразличим в масштабе глобуса. Климатический слой показывает глобальную тенденцию цветом, не вычисляет региональный климат. Пангея Ультима — оцифрованный контур одного сценария +250 млн лет; его нельзя принимать за карту всех последующих дат.',
-                      '21st-century coasts retain modern geometry: metre-scale sea-level rise is invisible at globe scale. The climate layer colours a global trend; it does not compute regional climate. Pangaea Ultima is a digitised outline of one +250 Myr scenario, not a map of every later date.',
+                      'Современная поверхность — NASA Blue Marble (2004), 8K, рельеф GEBCO. Остальные эпохи — 4K с условным мелким рельефом. Движение берегов рассчитано между реконструкциями, а не физической моделью тектоники. До 1882 года искусственное свечение скрыто. Затем показаны выборочные подтверждённые очаги: Лондон и Нью-Йорк с 1882-го, Токио с 1887-го. Это усиленные отметки, не полная карта освещения. Спутниковая карта ночных огней 2016 года появляется только с 2016-го. Её затухание после 2100 года условно. География далёкого будущего — один из сценариев.',
+                      'Modern surface: NASA Blue Marble (2004), 8K, with GEBCO relief. Other eras use 4K maps with illustrative fine relief. Registered coast motion is not a physical tectonic model. Artificial glow is hidden before 1882. Selected documented locations then appear: London and New York from 1882, Tokyo from 1887. These are amplified markers, not complete historical lighting maps. The 2016 satellite night map only appears from 2016. Its decline after 2100 is hypothetical. Deep-future geography illustrates one scenario.',
                     )}
+                  </p>
+                  <p className="light-sources">
+                    <a
+                      href="https://www.tepco.co.jp/shiryokan/virtualtour/"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      TEPCO
+                    </a>
+                    {' · '}
+                    <a
+                      href="https://www.tepco.co.jp/shiryokan/floor/index-j.html"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Tokyo · 1887
+                    </a>
+                    {' · '}
+                    <a
+                      href="https://edison.rutgers.edu/life-of-edison/chronology/1881-1890"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      Edison Papers · 1882
+                    </a>
+                    {' · '}
+                    <a
+                      href="https://science.nasa.gov/earth/earth-observatory/earth-at-night/maps/"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      NASA · 2016
+                    </a>
                   </p>
                 </div>
               </div>
+              <p className="narration-credit">
+                {t('Голос George · Озвучка: ', 'George voice · Narration: ')}
+                <a
+                  href="https://elevenlabs.io"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  elevenlabs.io
+                </a>
+              </p>
               <h4 className="sources-subtitle">
                 {t('ДЛЯ ВЫБРАННОЙ ЭПОХИ', 'FOR THE SELECTED EPOCH')}
               </h4>

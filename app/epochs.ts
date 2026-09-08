@@ -736,8 +736,8 @@ export const epochs: Epoch[] = [
     ['На развилке будущего', 'At a future crossroads'],
     ['Один век. Разные планеты.', 'One century. Different worlds.'],
     [
-      'К концу века низкие и высокие выбросы дают резко разные результаты для жары, ледников, кораллов и продовольственной безопасности. Уровень моря продолжит расти и после стабилизации температуры. Показанная температура рассчитана из изменения относительно 1850–1900, а не предсказывает отдельный год. После 2100 численность населения здесь не экстраполируется.',
-      'By century’s end, low and high emissions produce sharply different outcomes for heat, glaciers, coral reefs and food security. Sea level will keep rising even after temperature stabilises. The displayed temperature is derived from change relative to 1850–1900, not a prediction for one year. Population is not extrapolated beyond 2100.',
+      'К концу века низкие и высокие выбросы дают резко разные результаты для жары, ледников, кораллов и продовольственной безопасности. Уровень моря продолжит расти и после стабилизации температуры. Показанная температура рассчитана из изменения относительно 1850–1900, а не предсказывает отдельный год. После 2100 серые числа обозначают условную ИИ-реконструкцию, а не прогноз ООН.',
+      'By century’s end, low and high emissions produce sharply different outcomes for heat, glaciers, coral reefs and food security. Sea level will keep rising even after temperature stabilises. The displayed temperature is derived from change relative to 1850–1900, not a prediction for one year. After 2100, grey values are hypothetical AI reconstructions, not UN projections.',
     ],
     ['Жизнь зависит от сценария', 'Life depends on the scenario'],
     ['Будущее · Конец XXI века', 'Future · Late 21st century'],
@@ -755,8 +755,8 @@ export const epochs: Epoch[] = [
       'Emissions end. Their effects linger.',
     ],
     [
-      'Часть выброшенного CO₂ влияет на климат веками и тысячелетиями. Океан и ледяные щиты реагируют медленно, поэтому подъём моря продолжается после стабилизации потепления. Будущие технологии, население и политические решения нельзя надёжно предсказать. Вместо точных чисел здесь показаны только устойчивые физические выводы.',
-      'Some emitted CO₂ affects climate for centuries to millennia. Oceans and ice sheets respond slowly, so sea-level rise persists after warming stabilises. Future technology, population and political choices cannot be reliably predicted. Only robust physical conclusions are shown here, rather than precise numbers.',
+      'Часть выброшенного CO₂ влияет на климат веками и тысячелетиями. Океан и ледяные щиты реагируют медленно, поэтому подъём моря продолжается после стабилизации потепления. Будущие технологии, население и политические решения нельзя надёжно предсказать. Серые числа — условная ИИ-реконструкция для наглядности, а не надёжный прогноз.',
+      'Some emitted CO₂ affects climate for centuries to millennia. Oceans and ice sheets respond slowly, so sea-level rise persists after warming stabilises. Future technology, population and political choices cannot be reliably predicted. Grey numbers are a hypothetical AI reconstruction for illustration, not a reliable forecast.',
     ],
     [
       'Состав будущей биосферы неизвестен',
@@ -953,8 +953,8 @@ export const sources: Record<
     title: 'UN · World Population Prospects 2024',
     url: 'https://population.un.org/wpp/',
     note: [
-      'Средний вариант до 2100; между опорными годами — интерполяция. После 2100 численность не прогнозируется.',
-      'Medium variant through 2100; interpolated between anchor years. No population projection after 2100.',
+      'Средний вариант до 2100; между опорными годами — интерполяция. После 2100 научный ряд заканчивается; серые значения — отдельная условная ИИ-реконструкция.',
+      'Medium variant through 2100; interpolated between anchor years. The scientific series ends in 2100; grey values are separate hypothetical AI reconstructions.',
     ],
   },
   copernicus: {
@@ -985,8 +985,8 @@ export const sources: Record<
     title: 'Scotese · PALEOMAP PaleoAtlas v3',
     url: 'https://www.earthbyte.org/paleomap-paleoatlas-for-gplates/',
     note: [
-      'Реальные палеогеографические реконструкции; выбирается ближайший доступный срез. Карты не являются спутниковыми снимками. CC BY 4.0.',
-      'Published paleogeographic reconstructions; the nearest available slice is selected. These are not satellite images. CC BY 4.0.',
+      'Берега основаны на палеогеографических реконструкциях. Промежуточные контуры интерполированы, цвет и фактура рельефа стилизованы под спутниковый вид. CC BY 4.0.',
+      'Coasts follow published paleogeography. Intermediate outlines are interpolated; colours and relief texture are styled to resemble satellite imagery. CC BY 4.0.',
     ],
   },
   future: {
@@ -1025,8 +1025,8 @@ export const sources: Record<
     title: 'NASA · Earth facts',
     url: 'https://science.nasa.gov/earth/facts/',
     note: [
-      'Современные океаны, атмосфера и параметры Земли. Текстуры NASA / Three.js; облака иллюстративные, не метеоданные.',
-      'Modern oceans, atmosphere and Earth parameters. NASA / Three.js textures; clouds are illustrative, not weather data.',
+      'Современные параметры Земли. Дневная поверхность NASA Blue Marble 2004, рельеф GEBCO; ночная карта NASA 2016. До 2016-го — выборочные датированные очаги электрификации, не спутниковые наблюдения.',
+      'Modern Earth parameters. NASA Blue Marble 2004 surface, GEBCO relief; NASA 2016 night map. Pre-2016 lights are selected dated electrification markers, not satellite observations.',
     ],
   },
 };
