@@ -36,7 +36,9 @@ for (const [i, row] of rows.entries()) {
   for (const lang of ['ru', 'en']) {
     assert.ok(row[lang].length > 400);
     assert.ok(hasAudio(row.id, lang), `Missing ${row.id}/${lang}`);
-    const file = 'public' + audioPath(row.id, lang);
+    const file =
+      'public' +
+      new URL(audioPath(row.id, lang), 'https://terra.local').pathname;
     const info = execFileSync('afinfo', [file], { encoding: 'utf8' });
     const duration = Number(info.match(/estimated duration:\s+([\d.]+)/)?.[1]);
     assert.ok(duration > 25 && duration < 180, `${file} duration ${duration}`);

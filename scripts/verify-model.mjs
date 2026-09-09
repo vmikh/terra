@@ -111,3 +111,23 @@ assert.equal(estimatedAt(NOW).inferredPopulation, false);
 console.log(
   `Verified ${surfaceFrames.length} dated surface frames, continuous frame boundaries, preserved modern styling, light chronology, and nonempty estimates across every epoch.`,
 );
+const { moonAt } = await load('app/moon-model.ts');
+assert.equal(moonAt(MIN).visible, false);
+assert.equal(moonAt(-4500000000).visible, true);
+assert.equal(moonAt(-4500000000).molten, 1);
+assert.equal(moonAt(-4400000000).molten, 0);
+assert.equal(moonAt(-4300000000).maria, 0);
+assert.equal(moonAt(NOW).maria, 1);
+assert.equal(moonAt(NOW).solarHeat, 0);
+assert.equal(moonAt(MAX).visible, false);
+for (let year = MIN; year < MAX; year += 1000000) {
+  const moon = moonAt(year);
+  for (const k of ['formation', 'molten', 'craters', 'maria', 'solarHeat']) {
+    assert.ok(moon[k] >= 0 && moon[k] <= 1);
+    assert.ok(Math.abs(moonAt(year + 1)[k] - moon[k]) < 0.00001);
+  }
+}
+assert.ok(fs.existsSync('public/textures/hq/moon.jpg'));
+console.log(
+  'Verified lunar formation, cooling, maria chronology, continuous visual parameters, and final disappearance.',
+);

@@ -7,6 +7,7 @@ import {
   surfaceFrames,
   yearAtSurfacePosition,
 } from './planet-model';
+import { moonAt } from './moon-model';
 import { TextureCache } from './texture-cache';
 import { lightsAt } from './night-lights';
 import { NOW, MAX } from './epochs';
@@ -287,6 +288,7 @@ export default function Globe({
         '/textures/hq/night-2016.jpg',
         '/textures/hq/modern-height.jpg',
         '/textures/hq/relief.jpg',
+        '/textures/hq/moon.jpg',
         ...surfaceFrames.flatMap((f) => [
           `/textures/hq/${f.key}.jpg`,
           `/textures/surface/${f.key}-field.png`,
@@ -306,6 +308,53 @@ export default function Globe({
     retryTextures.current = () => {
       void assets.preload();
     };
+    const moonUniforms = {
+      lunarMolten: { value: 0 },
+      lunarCraters: { value: 1 },
+      lunarMaria: { value: 1 },
+    };
+    const moonMaterial = new THREE.MeshPhongMaterial({
+      color: 0xb8b5af,
+      shininess: 2,
+      specular: 0x080808,
+    });
+    moonMaterial.onBeforeCompile = (shader) => {
+      Object.assign(shader.uniforms, moonUniforms);
+      shader.fragmentShader =
+        `uniform float lunarMolten, lunarCraters, lunarMaria;
+        float lunarHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+        ` + shader.fragmentShader;
+      shader.fragmentShader = shader.fragmentShader.replace(
+        '#include <map_fragment>',
+        `
+        #include <map_fragment>
+        #ifdef USE_MAP
+          vec2 grid = vMapUv * vec2(180.,90.);
+          float grain = lunarHash(floor(grid * 12.));
+          float crater = 0.;
+          for(int x=-1;x<=1;x++) for(int y=-1;y<=1;y++) {
+            vec2 cell = floor(grid) + vec2(float(x),float(y));
+            vec2 centre = cell + vec2(lunarHash(cell), lunarHash(cell + 19.));
+            float d = length(grid-centre);
+            float r = .08 + lunarHash(cell+41.)*.24;
+            crater += (smoothstep(r*.8,r,d)-smoothstep(r,r*1.25,d))*.13;
+            crater -= (1.-smoothstep(r*.3,r*.9,d))*.12;
+          }
+          vec3 ancient = vec3(.26,.25,.24) * (.82 + grain*.23) + crater*lunarCraters;
+          vec3 cooled = mix(ancient, diffuseColor.rgb, lunarMaria);
+          diffuseColor.rgb = mix(cooled, vec3(.12,.035,.008) * (.6+grain), lunarMolten);
+        #endif
+      `,
+      );
+    };
+    const moon = new THREE.Mesh(
+      new THREE.SphereGeometry(1.88 * 0.2727, 64, 48),
+      moonMaterial,
+    );
+    moon.rotation.y = -1.6;
+    moon.visible = false;
+    scene.add(moon);
+    let moonReady = false;
     const load = async (path: string, color = true) => {
       const url = await assets.get(path);
       if (disposed) throw new Error('disposed');
@@ -405,6 +454,15 @@ export default function Globe({
       if (disposed || backgroundStarted) return;
       backgroundStarted = true;
       void assets.preload();
+      load('/textures/hq/moon.jpg')
+        .then((texture) => {
+          moonMaterial.map = texture;
+          moonMaterial.bumpMap = texture;
+          moonMaterial.bumpScale = 0.008;
+          moonMaterial.needsUpdate = true;
+          moonReady = true;
+        })
+        .catch(() => {});
       // Keep the tour's first surface decoded and uploaded for immediate playback.
       void Promise.all([pair('proto'), getLava()])
         .then(([first]) => {
@@ -575,6 +633,17 @@ export default function Globe({
           number,
         ]),
       );
+      const lunar = moonAt(s.year);
+      moon.visible = moonReady && lunar.visible;
+      moon.scale.setScalar(lunar.formation);
+      moon.position.set(lunar.separation * 0.84, lunar.separation * 0.49, -0.8);
+      moonUniforms.lunarMolten.value = lunar.molten;
+      moonUniforms.lunarCraters.value = lunar.craters;
+      moonUniforms.lunarMaria.value = lunar.maria;
+      moonMaterial.bumpScale = 0.008 * lunar.maria;
+      moonMaterial.emissive.setRGB(1, 0.14, 0.015);
+      moonMaterial.emissiveIntensity =
+        lunar.molten * 0.8 + lunar.solarHeat * 0.65;
       globe.visible = ready && s.year < MAX;
       halo.visible = s.year < MAX;
       cloud.visible = cloud.visible && s.year < MAX;

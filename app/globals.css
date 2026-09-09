@@ -1890,3 +1890,90 @@ h1 {
   text-decoration: underline;
   cursor: pointer;
 }
+
+.story-source:hover,
+.story-source[data-highlighted] {
+  background: transparent !important;
+  color: #b4cce7;
+}
+.topbar {
+  height: 68px;
+  min-height: 68px;
+}
+.universe .globe {
+  inset: 1% 23% 4% 20%;
+}
+.moon-method {
+  color: #91a6be;
+  font-size: 12px;
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+.moon-method a {
+  color: #b6d5f6;
+  text-decoration: underline;
+}
+.device-loading {
+  min-height: 100dvh;
+  background: #080e16;
+}
+.desktop-placeholder {
+  min-height: 100dvh;
+  width: 100%;
+  padding: 44px 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  background:
+    radial-gradient(ellipse at 50% 35%, #23365088, transparent 65%), #080e16;
+  color: #edf3fc;
+}
+.desktop-placeholder .brand {
+  margin-bottom: 54px;
+}
+.desktop-placeholder-icon {
+  width: 100px;
+  height: 100px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(140deg, #33598244, #60528522);
+  border: 1px solid #b2cfee22;
+  border-radius: 28px;
+  margin-bottom: 28px;
+  color: #a3c7f2;
+}
+.desktop-placeholder-icon svg {
+  width: 46px;
+  height: 46px;
+  stroke-width: 1.2;
+}
+.desktop-placeholder h1 {
+  font-size: 27px;
+  line-height: 1.25;
+  max-width: 360px;
+}
+.desktop-placeholder p {
+  font-size: 14px;
+  line-height: 1.7;
+  max-width: 350px;
+  color: #91a5bf;
+  margin: 16px auto 0;
+}
+.desktop-placeholder [lang='en'] {
+  border-top: 1px solid #aacfff18;
+  margin-top: 30px;
+  padding-top: 24px;
+}
+.desktop-placeholder h2 {
+  font-size: 16px;
+  font-weight: 500;
+  color: #b9c9df;
+}
+.desktop-placeholder [lang='en'] p {
+  font-size: 12px;
+}
+.topbar > .language {
+  grid-column: 3;
+}

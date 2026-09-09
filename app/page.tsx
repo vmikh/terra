@@ -15,14 +15,13 @@ import {
   Orbit,
   Info,
   Cloud,
-  Compass,
   Search,
   Check,
-  Clock3,
   Maximize2,
   Minimize2,
   Leaf,
   Headphones,
+  Monitor,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -54,6 +53,44 @@ import {
 import { surfaceAt } from './planet-model';
 import { estimatedAt } from './estimates';
 export default function Home() {
+  const [desktop, setDesktop] = useState<boolean | null>(null);
+  useEffect(() => {
+    const media = matchMedia('(min-width: 1024px)');
+    const update = () => setDesktop(media.matches);
+    update();
+    media.addEventListener('change', update);
+    return () => media.removeEventListener('change', update);
+  }, []);
+  if (desktop === null) return <div className="device-loading" />;
+  if (!desktop)
+    return (
+      <main className="desktop-placeholder">
+        <a className="brand" href="/" aria-label="Terra">
+          <Orbit />
+          <span>
+            TERRA<span className="brand-dot">.</span>
+          </span>
+        </a>
+        <div className="desktop-placeholder-icon">
+          <Monitor aria-hidden="true" />
+        </div>
+        <h1>Большой мир — на большом экране</h1>
+        <p>
+          Откройте TERRA на компьютере, чтобы исследовать Землю и путешествовать
+          по её истории.
+        </p>
+        <div lang="en">
+          <h2>A whole world needs a bigger screen</h2>
+          <p>
+            Open TERRA on your computer to explore Earth and travel through its
+            history.
+          </p>
+        </div>
+      </main>
+    );
+  return <Observatory />;
+}
+function Observatory() {
   const [globeJump, setGlobeJump] = useState(0);
   const narrationRef = useRef<NarrationHandle>(null);
   const [lang, setLang] = useState<Lang>('ru'),
@@ -65,8 +102,7 @@ export default function Home() {
     [scenario, setScenario] = useState(1),
     [modal, setModal] = useState<'sources' | 'epochs' | 'details' | null>(null),
     [search, setSearch] = useState(''),
-    [full, setFull] = useState(false),
-    [view, setView] = useState<'natural' | 'climate'>('natural');
+    [full, setFull] = useState(false);
   const t = (ru: string, en: string) => (lang === 'ru' ? ru : en);
   const epoch = epochAt(year),
     index = epochs.indexOf(epoch),
@@ -261,29 +297,6 @@ export default function Home() {
             TERRA<span className="brand-dot">.</span>
           </span>
         </a>
-        <nav className="topnav">
-          <Button
-            variant="ghost"
-            className="nav-active"
-            onClick={() => setModal(null)}
-          >
-            {t('Исследовать', 'Explore')}
-          </Button>
-          <Button
-            variant="ghost"
-            onClick={() => {
-              setSearch('');
-              setModal('epochs');
-            }}
-          >
-            <Clock3 />
-            {t('Все эпохи', 'All epochs')}
-          </Button>
-          <Button variant="ghost" onClick={() => setModal('sources')}>
-            <BookOpen />
-            {t('Об исследовании', 'About the research')}
-          </Button>
-        </nav>
         <div className="language" aria-label={t('Язык', 'Language')}>
           <Button
             variant="ghost"
@@ -320,10 +333,6 @@ export default function Home() {
           </p>
         </div>
         <aside className="stats">
-          <div className="section-label">
-            {t('ПЛАНЕТА В ЦИФРАХ', 'THE PLANET IN NUMBERS')}{' '}
-            <span>01 — 04</span>
-          </div>
           {stats.map((s) => (
             <button
               className="stat"
@@ -356,36 +365,8 @@ export default function Home() {
           zoom={zoom}
           reset={reset}
           lang={lang}
-          climate={view === 'climate'}
           warming={nearFuture ? warmingAt(year, scenario) : 0}
         />
-        <div className="planet-caption">
-          <span className="live-dot" />
-          {t('ЗЕМЛЯ', 'EARTH')}
-          <span>
-            {t('Третья планета от Солнца', 'Third planet from the Sun')}
-          </span>
-        </div>
-        <div className="view-controls">
-          <Button
-            variant="ghost"
-            className={view === 'natural' ? 'active' : ''}
-            aria-pressed={view === 'natural'}
-            onClick={() => setView('natural')}
-          >
-            <Compass />
-            {t('Поверхность', 'Surface')}
-          </Button>
-          <Button
-            variant="ghost"
-            className={view === 'climate' ? 'active' : ''}
-            aria-pressed={view === 'climate'}
-            onClick={() => setView('climate')}
-          >
-            <Thermometer />
-            {t('Климат', 'Climate')}
-          </Button>
-        </div>
         <aside className="story-panel">
           <div className="section-label">
             <Sparkles />
@@ -529,37 +510,7 @@ export default function Home() {
             {full ? <Minimize2 /> : <Maximize2 />}
           </Button>
         </div>
-        {view === 'climate' && (
-          <div className="climate-legend">
-            <span>{t('КЛИМАТИЧЕСКИЙ КОНТЕКСТ', 'CLIMATE CONTEXT')}</span>
-            <strong>
-              {temperatureText}
-              {temperature === '—' ? '' : ' °C'}
-            </strong>
-            <p>
-              {nearFuture
-                ? t(
-                    'Цвет показывает глобальное потепление, не региональную карту.',
-                    'Colour indicates global warming, not a regional map.',
-                  )
-                : t(
-                    'Среднее для эпохи; это не карта местных температур.',
-                    'An epoch average, not a map of local temperatures.',
-                  )}
-            </p>
-            <div className="temperature-gradient" />
-            <small>
-              {t('Холоднее', 'Cooler')}
-              <span>{t('Теплее', 'Warmer')}</span>
-            </small>
-          </div>
-        )}
         <div className="globe-hint">
-          <div>
-            {t('Перетащите, чтобы вращать', 'Drag to rotate')}
-            <span>·</span>
-            {t('Прокрутите, чтобы приблизить', 'Scroll to zoom')}
-          </div>
           <button onClick={() => setModal('sources')}>
             {mapNote}
             <Info />
@@ -600,7 +551,10 @@ export default function Home() {
             <Button
               variant="outline"
               className="now-button"
-              onClick={() => navigate(NOW)}
+              onClick={() => {
+                setGlobeJump((value) => value + 1);
+                navigate(NOW);
+              }}
             >
               <RotateCcw />
               {t('Сейчас', 'Now')}
@@ -871,6 +825,35 @@ export default function Home() {
           )}
           {modal === 'sources' && (
             <div className="source-content">
+              <p className="moon-method">
+                {t(
+                  'Луна появляется около 4,5 млрд лет назад, остывает и постепенно приобретает кратеры и тёмные вулканические моря. Древний вид условный; современная карта — NASA Scientific Visualization Studio / LRO. Размер относительно Земли сохранён, расстояние сжато для наглядности. Будущий нагрев и исчезновение вместе с Землёй — иллюстрация выбранного солнечного сценария, а не расчёт лунной орбиты.',
+                  'The Moon appears around 4.5 billion years ago, cools, and gradually develops craters and dark volcanic plains. Ancient surfaces are illustrative; the modern map is from NASA Scientific Visualization Studio / LRO. Relative size is preserved; distance is compressed for visibility. Future heating and disappearance with Earth illustrate the selected solar scenario, not a calculated lunar orbit.',
+                )}{' '}
+                <a
+                  href="https://science.nasa.gov/moon/formation/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  NASA · {t('Происхождение', 'Formation')}
+                </a>{' '}
+                ·{' '}
+                <a
+                  href="https://science.nasa.gov/moon/facts/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  {t('Эволюция', 'Evolution')}
+                </a>{' '}
+                ·{' '}
+                <a
+                  href="https://svs.gsfc.nasa.gov/4720/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  LRO CGI Moon Kit
+                </a>
+              </p>
               <div className="method-box">
                 <Info />
                 <div>

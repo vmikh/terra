@@ -14,4 +14,4 @@ export function chapterIndexAt(year: number) {
   return next < 0 ? audioChapters.length - 1 : Math.max(0, next - 1);
 }
 export const audioPath = (id: string, lang: 'ru' | 'en') =>
-  `/audio/chapter-${id}-${lang}.mp3`;
+  `/audio/chapter-${id}-${lang}.mp3${id === '03' && lang === 'ru' ? '?v=2' : ''}`;
