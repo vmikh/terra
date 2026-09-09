@@ -1280,9 +1280,6 @@ h1 {
   font-size: 12px;
   margin-bottom: 7px;
 }
-.universe .globe {
-  inset: 3% 23% 4% 20%;
-}
 .globe-status {
   z-index: 3;
   background: #0a1421b0;
@@ -1428,9 +1425,6 @@ h1 {
   font-size: 10px;
   color: #907764;
   line-height: 1.8;
-}
-.universe .globe {
-  inset: 12% 23% 7% 20%;
 }
 @media (max-height: 760px) {
   .stats {
@@ -1900,9 +1894,6 @@ h1 {
   height: 68px;
   min-height: 68px;
 }
-.universe .globe {
-  inset: 1% 23% 4% 20%;
-}
 .moon-method {
   color: #91a6be;
   font-size: 12px;
@@ -1976,4 +1967,23 @@ h1 {
 }
 .topbar > .language {
   grid-column: 3;
+}
+
+/* The scene ends at the actual side panels, not a percentage-based crop. */
+.universe {
+  --panel-gutter: 42px;
+  --stats-width: 244px;
+  --story-width: 278px;
+}
+.universe .stats {
+  left: var(--panel-gutter);
+  width: var(--stats-width);
+}
+.universe .story-panel {
+  right: var(--panel-gutter);
+  width: var(--story-width);
+}
+.universe .globe {
+  inset: 0 calc(var(--panel-gutter) + var(--story-width)) 0
+    calc(var(--panel-gutter) + var(--stats-width));
 }

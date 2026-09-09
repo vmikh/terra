@@ -312,40 +312,79 @@ export default function Globe({
       lunarMolten: { value: 0 },
       lunarCraters: { value: 1 },
       lunarMaria: { value: 1 },
+      lunarHeat: { value: 0 },
     };
     const moonMaterial = new THREE.MeshPhongMaterial({
       color: 0xb8b5af,
       shininess: 2,
       specular: 0x080808,
+      transparent: true,
     });
     moonMaterial.onBeforeCompile = (shader) => {
       Object.assign(shader.uniforms, moonUniforms);
       shader.fragmentShader =
-        `uniform float lunarMolten, lunarCraters, lunarMaria;
-        float lunarHash(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
-        ` + shader.fragmentShader;
-      shader.fragmentShader = shader.fragmentShader.replace(
-        '#include <map_fragment>',
         `
+        uniform float lunarMolten, lunarCraters, lunarMaria, lunarHeat;
+        float lunarHash(vec2 p) { return fract(sin(dot(p, vec2(127.1,311.7)))*43758.5453); }
+        float lunarHash3(vec3 p) { return fract(sin(dot(p,vec3(127.1,311.7,74.7)))*43758.5453); }
+        float lunarNoise(vec3 p) {
+          vec3 i=floor(p), f=fract(p); f=f*f*(3.-2.*f);
+          return mix(mix(mix(lunarHash3(i),lunarHash3(i+vec3(1,0,0)),f.x),
+            mix(lunarHash3(i+vec3(0,1,0)),lunarHash3(i+vec3(1,1,0)),f.x),f.y),
+            mix(mix(lunarHash3(i+vec3(0,0,1)),lunarHash3(i+vec3(1,0,1)),f.x),
+            mix(lunarHash3(i+vec3(0,1,1)),lunarHash3(i+vec3(1,1,1)),f.x),f.y),f.z);
+        }
+        float lunarFbm(vec3 p) {
+          return lunarNoise(p)*.53+lunarNoise(p*2.03)*.27+lunarNoise(p*4.09)*.13+lunarNoise(p*8.21)*.07;
+        }
+      ` + shader.fragmentShader;
+      shader.fragmentShader = shader.fragmentShader
+        .replace(
+          '#include <map_fragment>',
+          `
         #include <map_fragment>
+        vec3 lunarEmission=vec3(0.);
         #ifdef USE_MAP
-          vec2 grid = vMapUv * vec2(180.,90.);
-          float grain = lunarHash(floor(grid * 12.));
-          float crater = 0.;
+          // Spherical noise avoids a longitude seam and polar texture pinching.
+          float longitude=vMapUv.x*6.2831853, latitude=vMapUv.y*3.14159265;
+          vec3 point=vec3(sin(latitude)*cos(longitude),cos(latitude),sin(latitude)*sin(longitude));
+          float broad=lunarFbm(point*6.);
+          float detail=lunarFbm(point*95.);
+          vec3 warped=point*17.+vec3(broad*4.,lunarFbm(point*9.)*3.,detail);
+          float plates=lunarFbm(warped);
+          float fissures=1.-smoothstep(.018,.075,abs(plates-.5));
+          float pools=smoothstep(.49,.66,broad);
+          float grain=lunarNoise(point*360.);
+          vec2 grid=vMapUv*vec2(100.,50.);
+          float crater=0.;
           for(int x=-1;x<=1;x++) for(int y=-1;y<=1;y++) {
-            vec2 cell = floor(grid) + vec2(float(x),float(y));
-            vec2 centre = cell + vec2(lunarHash(cell), lunarHash(cell + 19.));
-            float d = length(grid-centre);
-            float r = .08 + lunarHash(cell+41.)*.24;
-            crater += (smoothstep(r*.8,r,d)-smoothstep(r,r*1.25,d))*.13;
-            crater -= (1.-smoothstep(r*.3,r*.9,d))*.12;
+            vec2 cell=floor(grid)+vec2(float(x),float(y));
+            vec2 centre=cell+vec2(lunarHash(cell),lunarHash(cell+19.));
+            float d=length(grid-centre), r=.08+lunarHash(cell+41.)*.24;
+            crater+=(smoothstep(r*.8,r,d)-smoothstep(r,r*1.25,d))*.13;
+            crater-=(1.-smoothstep(r*.3,r*.9,d))*.12;
           }
-          vec3 ancient = vec3(.26,.25,.24) * (.82 + grain*.23) + crater*lunarCraters;
-          vec3 cooled = mix(ancient, diffuseColor.rgb, lunarMaria);
-          diffuseColor.rgb = mix(cooled, vec3(.12,.035,.008) * (.6+grain), lunarMolten);
+          vec3 ancient=vec3(.23,.22,.21)*(.55+broad*.8+detail*.4+grain*.1)+crater*lunarCraters;
+          // Old fractured crust remains detailed before the mapped maria exist.
+          ancient*=1.-fissures*.22;
+          vec3 cooled=mix(ancient,diffuseColor.rgb,lunarMaria);
+          float melt=max(lunarMolten,smoothstep(.72,1.,lunarHeat));
+          float hot=(fissures*.65+pools*.8)*melt;
+          vec3 crust=vec3(.07,.045,.028)*(.4+detail*1.5+grain*.2);
+          diffuseColor.rgb=mix(cooled,crust,melt*.88);
+          // Spatially varying emission preserves dark crust even on the night side.
+          lunarEmission=mix(vec3(1.,.055,.002),vec3(1.,.48,.06),pools)*hot*1.35;
+          lunarEmission+=cooled*vec3(.8,.15,.025)*lunarHeat*.3;
         #endif
       `,
-      );
+        )
+        .replace(
+          '#include <emissivemap_fragment>',
+          `
+        #include <emissivemap_fragment>
+        totalEmissiveRadiance=lunarEmission;
+      `,
+        );
     };
     const moon = new THREE.Mesh(
       new THREE.SphereGeometry(1.88 * 0.2727, 64, 48),
@@ -641,9 +680,8 @@ export default function Globe({
       moonUniforms.lunarCraters.value = lunar.craters;
       moonUniforms.lunarMaria.value = lunar.maria;
       moonMaterial.bumpScale = 0.008 * lunar.maria;
-      moonMaterial.emissive.setRGB(1, 0.14, 0.015);
-      moonMaterial.emissiveIntensity =
-        lunar.molten * 0.8 + lunar.solarHeat * 0.65;
+      moonUniforms.lunarHeat.value = lunar.solarHeat;
+      moonMaterial.opacity = lunar.endVisibility;
       globe.visible = ready && s.year < MAX;
       halo.visible = s.year < MAX;
       cloud.visible = cloud.visible && s.year < MAX;

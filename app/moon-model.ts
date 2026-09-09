@@ -12,6 +12,8 @@ export function moonAt(year: number) {
     molten: 1 - smooth(-4500000000, -4400000000, year),
     craters: smooth(-4450000000, -3800000000, year),
     maria: smooth(-4200000000, -1200000000, year),
+    // A short visual fade in the chosen engulfment scenario, not an orbital prediction.
+    endVisibility: 1 - smooth(MAX - 100000000, MAX, year),
     solarHeat: smooth(3000002026, MAX, year),
     // Compressed separation only; do not extrapolate today's recession rate.
     separation: 2.6 + 0.5 * smooth(-4500000000, 2026, year),

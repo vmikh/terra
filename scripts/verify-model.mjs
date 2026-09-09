@@ -120,6 +120,12 @@ assert.equal(moonAt(-4300000000).maria, 0);
 assert.equal(moonAt(NOW).maria, 1);
 assert.equal(moonAt(NOW).solarHeat, 0);
 assert.equal(moonAt(MAX).visible, false);
+assert.equal(moonAt(NOW).endVisibility, 1);
+assert.equal(moonAt(MAX).endVisibility, 0);
+assert.ok(
+  moonAt(MAX - 50000000).endVisibility > 0 &&
+    moonAt(MAX - 50000000).endVisibility < 1,
+);
 for (let year = MIN; year < MAX; year += 1000000) {
   const moon = moonAt(year);
   for (const k of ['formation', 'molten', 'craters', 'maria', 'solarHeat']) {
