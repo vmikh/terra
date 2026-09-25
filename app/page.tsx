@@ -573,38 +573,6 @@ function Observatory() {
             </button>
           ))}
         </div>
-        <div className="timeline-bottom">
-          <span>
-            {t('Нелинейная шкала', 'Nonlinear scale')}
-            <span className="thin-dot">·</span>
-            {t(
-              `${epochs.length} эпох · 15 аудиоглав`,
-              `${epochs.length} epochs · 15 audio chapters`,
-            )}
-          </span>
-          <div className="quick-jumps">
-            {[
-              [-4540000000, t('Рождение', 'Birth')],
-              [-299000000, t('Пангея', 'Pangaea')],
-              [-66000000, t('Астероид', 'Asteroid')],
-              [2100, t('2100 год', 'Year 2100')],
-              [MAX, t('Последняя глава', 'Final chapter')],
-            ].map(([y, label]) => (
-              <button
-                type="button"
-                className="btn btn-sm"
-                key={y}
-                onClick={() => navigate(Number(y))}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-          <button type="button" className="btn btn-link" onClick={() => setModal('sources')}>
-            {t('Данные', 'Data')}: NASA · IPCC · {t('ООН', 'UN')} · PALEOMAP
-            <ArrowUpRightIcon />
-          </button>
-        </div>
       </footer>
       <Dialog
         open={modal !== null}

@@ -10,6 +10,7 @@ export const metadata: Metadata = {
       ? 'https://terra-sim.vercel.app'
       : 'https://terra-earth-through-time.vmikh.chatgpt.site',
   ),
+  icons: { icon: '/favicon.svg' },
   openGraph: {
     title: 'Terra: Earth through time',
     description:

@@ -328,12 +328,6 @@ button { cursor: pointer; transition: transform var(--dur-3) var(--ease-press), 
 .timeline-labels b { font-weight: var(--fw-medium); color: var(--text-muted); }
 .timeline-labels button:hover, .timeline-labels button:hover b { color: var(--text-primary); }
 .timeline-labels .present-tick, .timeline-labels .present-tick b { color: var(--text-primary); font-weight: var(--fw-semibold); }
-.timeline-bottom { display: flex; align-items: center; justify-content: space-between; gap: var(--space-16); padding-top: var(--space-10); border-top: 1px solid var(--line-divider); }
-.timeline-bottom > span { display: flex; align-items: center; gap: var(--space-8); font-size: var(--fs-sm); color: var(--text-muted); }
-.quick-jumps { display: flex; gap: var(--space-8); }
-.timeline-bottom > .btn-link { font-size: var(--fs-sm); color: var(--text-secondary); }
-.timeline-bottom > .btn-link:hover { color: var(--text-primary); }
-.timeline-bottom > .btn-link > svg { width: var(--size-icon-sm); height: var(--size-icon-sm); }
 
 /* Narration player: sits straight on the timeline island. */
 .narration-player { position: relative; display: flex; flex-direction: column; gap: var(--space-8); min-width: 0; }
