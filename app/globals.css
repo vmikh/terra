@@ -249,8 +249,9 @@ button { cursor: pointer; transition: transform var(--dur-3) var(--ease-press), 
 .globe canvas { position: absolute; inset: 0; display: block; }
 
 /* Left island: brand, the epoch, its numbers and its story. */
-.left-panel { position: absolute; z-index: 2; top: 0; bottom: 0; left: 0; width: var(--panel-width); display: flex; flex-direction: column; gap: var(--space-24); padding: var(--island-pad); background: var(--bg-1); border-radius: var(--radius-island); overflow: hidden; }
-.left-panel::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: calc(var(--size-row) + var(--island-pad)); pointer-events: none; background: linear-gradient(to top, var(--bg-1) 45%, transparent); }
+.left-panel { position: absolute; z-index: 2; top: 0; bottom: 0; left: 0; width: var(--panel-width); display: flex; flex-direction: column; gap: var(--space-24); padding: var(--island-pad) var(--island-pad) 0; background: var(--bg-1); border-radius: var(--radius-island); overflow: hidden; }
+.left-panel::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: var(--size-row); pointer-events: none; background: linear-gradient(to top, var(--bg-1) 20%, transparent); transition: opacity var(--dur-2) var(--ease); }
+.left-panel.at-end::after { opacity: 0; }
 .left-panel-header { display: flex; align-items: center; gap: var(--space-8); flex: none; }
 .brand { display: inline-flex; align-items: center; gap: var(--space-8); margin-right: auto; color: var(--text-primary); text-decoration: none; }
 .brand:hover { color: var(--text-primary); }
@@ -263,7 +264,7 @@ button { cursor: pointer; transition: transform var(--dur-3) var(--ease-press), 
 .section-label > span { margin-left: auto; font-variant-numeric: tabular-nums; }
 .epoch-heading h1 { font-size: var(--fs-h2); line-height: var(--lh-tight); font-weight: var(--fw-semibold); letter-spacing: -.01em; }
 .epoch-heading p { font-size: var(--fs-meta); color: var(--text-secondary); }
-.left-panel-content { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: var(--space-28); padding-bottom: var(--space-40); }
+.left-panel-content { flex: 1; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: var(--space-28); padding-bottom: var(--island-pad); }
 
 .stats { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-8); }
 .stat { display: flex; flex-direction: column; justify-content: space-between; gap: var(--space-12); min-width: 0; padding: var(--space-14) var(--space-16) var(--space-16); border: 0; border-radius: var(--radius-lg); background: var(--bg-2); color: inherit; text-align: left; }

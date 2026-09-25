@@ -99,6 +99,12 @@ function DesktopPlaceholder() {
 function Observatory() {
   const [globeJump, setGlobeJump] = useState(0);
   const narrationRef = useRef<NarrationHandle>(null);
+  const panelContent = useRef<HTMLDivElement>(null);
+  const [panelAtEnd, setPanelAtEnd] = useState(true);
+  const updatePanelFade = () => {
+    const el = panelContent.current;
+    if (el) setPanelAtEnd(el.scrollTop + el.clientHeight >= el.scrollHeight - 1);
+  };
   const [lang, setLang] = useState<Lang>('ru'),
     [year, setYear] = useState(NOW),
     [rotation, setRotation] = useState(true),
@@ -140,6 +146,18 @@ function Observatory() {
     document.addEventListener('fullscreenchange', fn);
     return () => document.removeEventListener('fullscreenchange', fn);
   }, []);
+  useEffect(() => {
+    // The bottom fade only hints at more story below; it disappears at the end.
+    // Re-observe when the epoch, language or scenario replaces the panel content.
+    const el = panelContent.current;
+    if (!el) return;
+    const observer = new ResizeObserver(() =>
+      setPanelAtEnd(el.scrollTop + el.clientHeight >= el.scrollHeight - 1),
+    );
+    observer.observe(el);
+    for (const child of el.children) observer.observe(child);
+    return () => observer.disconnect();
+  }, [year, lang, scenario]);
   const map = useMemo(() => surfaceAt(year), [year]);
   const inferred = estimatedAt(year);
   const rawPop = populationAt(year),
@@ -293,7 +311,7 @@ function Observatory() {
       <section className="universe">
         <div className="ambient" />
         <div className="stars" />
-        <aside className="left-panel">
+        <aside className={`left-panel ${panelAtEnd ? 'at-end' : ''}`}>
           <div className="left-panel-header">
             <a className="brand" href="/" aria-label="Terra">
               <PlanetIcon />
@@ -312,7 +330,11 @@ function Observatory() {
             <h1>{pick(epoch.title, lang)}</h1>
             <p>{t('Одна планета. Миллиарды историй.', 'One planet. Billions of stories.')}</p>
           </div>
-          <div className="left-panel-content">
+          <div
+            className="left-panel-content"
+            ref={panelContent}
+            onScroll={updatePanelFade}
+          >
             <aside className="stats">
               {stats.map((s) => (
                 <button
