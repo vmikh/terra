@@ -207,7 +207,11 @@ button { cursor: pointer; transition: transform var(--dur-3) var(--ease-press), 
 
 .chip { display: inline-flex; align-items: center; gap: var(--space-6); height: var(--size-chip); padding: 0 var(--space-10); border-radius: var(--radius-full); background: var(--bg-2); color: var(--text-secondary); font-size: var(--fs-meta); white-space: nowrap; }
 .check { display: inline-flex; align-items: center; gap: var(--space-8); cursor: pointer; font-size: var(--fs-meta); color: var(--text-secondary); }
-.check input { accent-color: var(--bg-accent); width: var(--size-check); height: var(--size-check); margin: 0; }
+.check input { flex: none; appearance: none; -webkit-appearance: none; width: var(--size-check); height: var(--size-check); margin: 0; border: 0; border-radius: var(--radius-xs); background: var(--bg-2) center / 100% no-repeat; cursor: pointer; transition: background-color var(--dur-2) var(--ease-press); }
+.check:hover input { background-color: var(--bg-3); }
+/* check mark fill = --text-on-accent (gray-950); data URIs cannot read variables */
+.check input:checked { background-color: var(--bg-accent); background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path d='M4 8.2 6.8 11 12 5.4' fill='none' stroke='%230A0B0E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/></svg>"); }
+.check:hover input:checked { background-color: var(--bg-accent-hover); }
 .range { width: 100%; accent-color: var(--bg-accent); }
 .cluster { display: flex; align-items: center; gap: var(--space-8); flex-wrap: wrap; } .cluster-1 { gap: var(--space-6); }
 
