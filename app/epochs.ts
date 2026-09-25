@@ -79,7 +79,7 @@ export const epochs: Epoch[] = [
     ['Первые океаны', 'The first oceans'],
     ['Камень остывает. Вода остаётся.', 'Rock cools. Water stays.'],
     [
-      'Древнейшие цирконы указывают на взаимодействие пород с жидкой водой уже около 4,4 млрд лет назад. Между крупными ударами поверхность могла остывать, а водяной пар — выпадать дождями. Атмосфера почти лишена свободного кислорода. Размер и расположение первых участков суши восстановить надёжно нельзя.',
+      'Древнейшие цирконы указывают на взаимодействие пород с жидкой водой уже около 4,4 млрд лет назад. Между крупными ударами поверхность могла остывать, а водяной пар выпадать дождями. Атмосфера почти лишена свободного кислорода. Размер и расположение первых участков суши восстановить надёжно нельзя.',
       'Ancient zircons suggest rock interacted with liquid water around 4.4 billion years ago. Between major impacts, the surface could cool and water vapour could condense into rain. The atmosphere has almost no free oxygen. The extent and location of the first land cannot be reliably reconstructed.',
     ],
     ['Свидетельств жизни нет', 'No established life evidence'],
@@ -111,7 +111,7 @@ export const epochs: Epoch[] = [
       'Tiny organisms. An immense future.',
     ],
     [
-      'Микробные сообщества строят слоистые структуры — строматолиты. Бактерии и археи осваивают химическую энергию, некоторые используют свет. Суша остаётся без лесов и животных. Миллиарды лет самые важные преобразования планеты будут происходить в мире, невидимом невооружённым глазом.',
+      'Микробные сообщества строят слоистые структуры: строматолиты. Бактерии и археи осваивают химическую энергию, некоторые используют свет. Суша остаётся без лесов и животных. Миллиарды лет самые важные преобразования планеты будут происходить в мире, невидимом невооружённым глазом.',
       'Microbial communities build layered structures called stromatolites. Bacteria and archaea exploit chemical energy, and some use sunlight. Land has no forests or animals. For billions of years, the planet’s greatest transformations will happen in a world invisible to the naked eye.',
     ],
     [
@@ -154,7 +154,7 @@ export const epochs: Epoch[] = [
     ['Сложная клетка', 'The complex cell'],
     ['Новая архитектура жизни.', 'A new architecture for life.'],
     [
-      'В летописи ископаемых появляются убедительные признаки эукариот — клеток с ядром. Союз древних клеток дал начало митохондриям, энергетическим органеллам. Эти изменения в будущем позволят появиться водорослям, грибам, растениям и животным. Пока биосфера остаётся преимущественно микробной.',
+      'В летописи ископаемых появляются убедительные признаки эукариот: клеток с ядром. Союз древних клеток дал начало митохондриям, энергетическим органеллам. Эти изменения в будущем позволят появиться водорослям, грибам, растениям и животным. Пока биосфера остаётся преимущественно микробной.',
       'The fossil record shows convincing evidence of eukaryotes: cells with nuclei. Ancient cellular partnerships gave rise to mitochondria, the cell’s energy-producing organelles. These changes will eventually enable algae, fungi, plants and animals. For now, the biosphere remains predominantly microbial.',
     ],
     ['Бактерии · Археи · Эукариоты', 'Bacteria · Archaea · Eukaryotes'],
@@ -261,7 +261,7 @@ export const epochs: Epoch[] = [
       'Swamps that will fuel an industrial world.',
     ],
     [
-      'В каменноугольном периоде экваториальные заболоченные леса накапливают растительные остатки — будущий уголь. Кислорода временами больше, чем сегодня; среди членистоногих встречаются гиганты. На юге лежат ледники. Появляются амниоты, способные размножаться вдали от открытой воды.',
+      'В каменноугольном периоде экваториальные заболоченные леса накапливают растительные остатки: из них образуется уголь. Кислорода временами больше, чем сегодня; среди членистоногих встречаются гиганты. На юге лежат ледники. Появляются амниоты, способные размножаться вдали от открытой воды.',
       'Equatorial swamp forests accumulate plant remains that will become coal. Oxygen is at times higher than today, and some arthropods reach giant sizes. Ice sheets occupy southern land. Amniotes emerge, able to reproduce away from open water.',
     ],
     ['Плауны · Папоротники · Земноводные', 'Lycopsids · Ferns · Amphibians'],
@@ -625,7 +625,7 @@ export const epochs: Epoch[] = [
     ['Цифровая планета', 'The digital planet'],
     ['Информация обгоняет расстояния.', 'Information outpaces distance.'],
     [
-      'Интернет и мобильная связь соединяют общества. Международная торговля и производство растут, вместе с ними — энергопотребление и выбросы. Возобновляемая энергетика ещё занимает небольшую долю. Спутники и климатические модели всё лучше показывают потепление, таяние льда и изменение землепользования.',
+      'Интернет и мобильная связь соединяют общества. Международная торговля и производство растут, а вместе с ними энергопотребление и выбросы. Возобновляемая энергетика ещё занимает небольшую долю. Спутники и климатические модели всё лучше показывают потепление, таяние льда и изменение землепользования.',
       'The internet and mobile communications connect societies. Global trade and production expand, along with energy use and emissions. Renewables still provide a small share of energy. Satellites and climate models increasingly reveal warming, melting ice and land-use change.',
     ],
     ['Люди · Растения · Микроорганизмы', 'Humans · Plants · Microorganisms'],
@@ -698,7 +698,7 @@ export const epochs: Epoch[] = [
       'Adaptation becomes everyday life.',
     ],
     [
-      'Города адаптируются к жаре, водоснабжение и сельское хозяйство — к меняющимся осадкам. Старение населения и урбанизация идут неравномерно. Чем выше выбросы, тем сильнее потепление и ущерб природе. Демографическая оценка основана на среднем варианте ООН; климатические сценарии выбираются отдельно.',
+      'Города адаптируются к жаре, водоснабжение и сельское хозяйство подстраиваются к меняющимся осадкам. Старение населения и урбанизация идут неравномерно. Чем выше выбросы, тем сильнее потепление и ущерб природе. Демографическая оценка основана на среднем варианте ООН; климатические сценарии выбираются отдельно.',
       'Cities adapt to heat while water supplies and farming adjust to changing rainfall. Population ageing and urbanisation unfold unevenly. Higher emissions mean greater warming and ecological damage. Population follows the UN medium projection; climate scenarios are selected independently.',
     ],
     [
@@ -751,11 +751,11 @@ export const epochs: Epoch[] = [
     2101,
     ['Долгое климатическое наследие', 'A long climate legacy'],
     [
-      'Выбросы заканчиваются. Последствия — не сразу.',
+      'Выбросы заканчиваются. Последствия остаются надолго.',
       'Emissions end. Their effects linger.',
     ],
     [
-      'Часть выброшенного CO₂ влияет на климат веками и тысячелетиями. Океан и ледяные щиты реагируют медленно, поэтому подъём моря продолжается после стабилизации потепления. Будущие технологии, население и политические решения нельзя надёжно предсказать. Серые числа — условная ИИ-реконструкция для наглядности, а не надёжный прогноз.',
+      'Часть выброшенного CO₂ влияет на климат веками и тысячелетиями. Океан и ледяные щиты реагируют медленно, поэтому подъём моря продолжается после стабилизации потепления. Будущие технологии, население и политические решения нельзя надёжно предсказать. Серые числа показывают условную ИИ-реконструкцию для наглядности, а не надёжный прогноз.',
       'Some emitted CO₂ affects climate for centuries to millennia. Oceans and ice sheets respond slowly, so sea-level rise persists after warming stabilises. Future technology, population and political choices cannot be reliably predicted. Grey numbers are a hypothetical AI reconstruction for illustration, not a reliable forecast.',
     ],
     [
@@ -790,7 +790,7 @@ export const epochs: Epoch[] = [
     ['Следующий суперконтинент', 'The next supercontinent'],
     ['Возможное новое соединение суши.', 'Land may come together again.'],
     [
-      'Пангея Ультима — один из сценариев следующего суперконтинента, примерно через 250 млн лет. Его жаркие внутренние области, вулканический CO₂ и более яркое Солнце могут серьёзно ограничить пригодные для млекопитающих территории. Другие тектонические сценарии дают другую географию; это не единственная «правильная карта будущего».',
+      'Пангея Ультима: один из сценариев следующего суперконтинента, примерно через 250 млн лет. Его жаркие внутренние области, вулканический CO₂ и более яркое Солнце могут серьёзно ограничить пригодные для млекопитающих территории. Другие тектонические сценарии дают другую географию; это не единственная «правильная карта будущего».',
       'Pangaea Ultima is one scenario for a new supercontinent, around 250 million years from now. Hot interiors, volcanic CO₂ and a brighter Sun could severely limit land suitable for mammals. Other tectonic scenarios produce different geographies; there is no single correct future map.',
     ],
     ['Виды неизвестны · Тепловой стресс', 'Species unknown · Heat stress'],
@@ -921,7 +921,7 @@ export const sources: Record<
     title: 'Judd et al. · Science (2024)',
     url: 'https://doi.org/10.1126/science.adk3705',
     note: [
-      'Реконструкция климата за 485 млн лет. Диапазоны в приложении — округлённые ориентиры для эпох, не точные годовые значения.',
+      'Реконструкция климата за 485 млн лет. Диапазоны в приложении: округлённые ориентиры для эпох, не точные годовые значения.',
       '485 million years of climate reconstruction. App ranges are rounded epoch-level guides, not exact annual values.',
     ],
   },
@@ -953,7 +953,7 @@ export const sources: Record<
     title: 'UN · World Population Prospects 2024',
     url: 'https://population.un.org/wpp/',
     note: [
-      'Средний вариант до 2100; между опорными годами — интерполяция. После 2100 научный ряд заканчивается; серые значения — отдельная условная ИИ-реконструкция.',
+      'Средний вариант до 2100; между опорными годами используется интерполяция. После 2100 научный ряд заканчивается; серые значения показывают отдельную условную ИИ-реконструкцию.',
       'Medium variant through 2100; interpolated between anchor years. The scientific series ends in 2100; grey values are separate hypothetical AI reconstructions.',
     ],
   },
@@ -961,7 +961,7 @@ export const sources: Record<
     title: 'Copernicus · Global Climate Highlights 2025',
     url: 'https://climate.copernicus.eu/copernicus-2025-was-third-hottest-year-record',
     note: [
-      '14,97 °C — средняя температура воздуха у поверхности за 2025, последний полный год. Это не среднее за незавершённый 2026.',
+      '14,97 °C: средняя температура воздуха у поверхности за 2025, последний полный год. Это не среднее за незавершённый 2026.',
       '14.97 °C is 2025 surface air temperature, the latest full year. It is not an average for incomplete 2026.',
     ],
   },
@@ -977,7 +977,7 @@ export const sources: Record<
     title: 'IPBES · Global Assessment (2019)',
     url: 'https://www.ipbes.net/global-assessment',
     note: [
-      'Землепользование, эксплуатация ресурсов, климат, загрязнение и инвазивные виды — ключевые факторы утраты природы.',
+      'Землепользование, эксплуатация ресурсов, климат, загрязнение и инвазивные виды: ключевые факторы утраты природы.',
       'Land use, exploitation, climate, pollution and invasive species are key drivers of nature loss.',
     ],
   },
@@ -993,7 +993,7 @@ export const sources: Record<
     title: 'Farnsworth et al. · Nature Geoscience (2023)',
     url: 'https://www.nature.com/articles/s41561-023-01259-3',
     note: [
-      'Пангея Ультима — условная конфигурация около +250 млн лет. Это одна гипотеза, не достоверный прогноз берегов.',
+      'Пангея Ультима: условная конфигурация около +250 млн лет. Это одна гипотеза, не достоверный прогноз берегов.',
       'Pangaea Ultima is a conditional +250 Myr configuration, one hypothesis rather than a certain coastline forecast.',
     ],
   },
@@ -1025,7 +1025,7 @@ export const sources: Record<
     title: 'NASA · Earth facts',
     url: 'https://science.nasa.gov/earth/facts/',
     note: [
-      'Современные параметры Земли. Дневная поверхность NASA Blue Marble 2004, рельеф GEBCO; ночная карта NASA 2016. До 2016-го — выборочные датированные очаги электрификации, не спутниковые наблюдения.',
+      'Современные параметры Земли. Дневная поверхность NASA Blue Marble 2004, рельеф GEBCO; ночная карта NASA 2016. До 2016-го показаны выборочные датированные очаги электрификации, не спутниковые наблюдения.',
       'Modern Earth parameters. NASA Blue Marble 2004 surface, GEBCO relief; NASA 2016 night map. Pre-2016 lights are selected dated electrification markers, not satellite observations.',
     ],
   },
@@ -1066,7 +1066,13 @@ export function yearToPosition(y: number) {
 export function epochAt(y: number) {
   return epochs.reduce((a, e) => (e.year <= y ? e : a), epochs[0]);
 }
-export const pick = (p: Pair, l: Lang) => p[l === 'ru' ? 0 : 1];
+// Russian copy keeps short prepositions and conjunctions on the same line as the next word.
+export const nbsp = (s: string) =>
+  s.replace(
+    /(?<=^|[\s(«"])(в|во|к|ко|с|со|о|об|у|и|а|на|по|за|из|до|от|не|но|для|при|без|под|над|про)\s+/giu,
+    '$1\u00a0',
+  );
+export const pick = (p: Pair, l: Lang) => (l === 'ru' ? nbsp(p[0]) : p[1]);
 export function dateLabel(y: number, l: Lang): { value: string; unit: string } {
   const n = (v: number) =>
     new Intl.NumberFormat(l, { maximumFractionDigits: 2 }).format(v);

@@ -804,7 +804,7 @@ export default function Globe({
                 : 'For a smooth journey, please wait for loading to finish.'}
           </p>
           {preload.failed && (
-            <button onClick={() => retryTextures.current()}>
+            <button type="button" className="btn btn-link" onClick={() => retryTextures.current()}>
               {lang === 'ru' ? 'Повторить' : 'Retry'}
             </button>
           )}

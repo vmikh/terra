@@ -1,31 +1,26 @@
 'use client';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import {
-  ArrowUpRight,
-  Thermometer,
-  Users,
-  Waves,
-  Wind,
-  RotateCcw,
-  Plus,
-  Minus,
-  Sparkles,
-  ChevronRight,
-  BookOpen,
-  Orbit,
-  Info,
-  Cloud,
-  Search,
-  Check,
-  Maximize2,
-  Minimize2,
-  Leaf,
-  Headphones,
-  Monitor,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Slider } from '@/components/ui/slider';
-import { Input } from '@/components/ui/input';
+  ArrowUpRightIcon,
+  ThermometerIcon,
+  UsersIcon,
+  WavesIcon,
+  WindIcon,
+  ArrowCounterClockwiseIcon,
+  ArrowsClockwiseIcon,
+  PlusIcon,
+  MinusIcon,
+  SparkleIcon,
+  PlanetIcon,
+  InfoIcon,
+  CloudIcon,
+  CornersOutIcon,
+  CornersInIcon,
+  LeafIcon,
+  HeadphonesIcon,
+  MonitorIcon,
+  IconContext,
+} from '@phosphor-icons/react';
 import {
   Dialog,
   DialogContent,
@@ -43,6 +38,7 @@ import {
   yearToPosition,
   positionToYear,
   pick,
+  nbsp,
   dateLabel,
   populationAt,
   scenarios,
@@ -61,34 +57,44 @@ export default function Home() {
     media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
   }, []);
-  if (desktop === null) return <div className="device-loading" />;
-  if (!desktop)
-    return (
+  return (
+    <IconContext.Provider value={{ weight: 'fill' }}>
+      {desktop === null ? (
+        <div className="device-loading" />
+      ) : desktop ? (
+        <Observatory />
+      ) : (
+        <DesktopPlaceholder />
+      )}
+    </IconContext.Provider>
+  );
+}
+function DesktopPlaceholder() {
+  return (
       <main className="desktop-placeholder">
         <a className="brand" href="/" aria-label="Terra">
-          <Orbit />
+          <PlanetIcon />
           <span>
-            TERRA<span className="brand-dot">.</span>
+            Terra<span className="brand-dot">.</span>
           </span>
         </a>
         <div className="desktop-placeholder-icon">
-          <Monitor aria-hidden="true" />
+          <MonitorIcon aria-hidden="true" />
         </div>
-        <h1>Большой мир — на большом экране</h1>
+        <h1>Большому миру нужен большой экран</h1>
         <p>
-          Откройте TERRA на компьютере, чтобы исследовать Землю и путешествовать
-          по её истории.
+          Откройте Terra на&nbsp;компьютере, чтобы исследовать Землю и&nbsp;путешествовать
+          по&nbsp;её истории.
         </p>
         <div lang="en">
           <h2>A whole world needs a bigger screen</h2>
           <p>
-            Open TERRA on your computer to explore Earth and travel through its
+            Open Terra on your computer to explore Earth and travel through its
             history.
           </p>
         </div>
       </main>
-    );
-  return <Observatory />;
+  );
 }
 function Observatory() {
   const [globeJump, setGlobeJump] = useState(0);
@@ -100,10 +106,9 @@ function Observatory() {
     [zoom, setZoom] = useState(0),
     [reset, setReset] = useState(0),
     [scenario, setScenario] = useState(1),
-    [modal, setModal] = useState<'sources' | 'epochs' | 'details' | null>(null),
-    [search, setSearch] = useState(''),
+    [modal, setModal] = useState<'sources' | 'details' | null>(null),
     [full, setFull] = useState(false);
-  const t = (ru: string, en: string) => (lang === 'ru' ? ru : en);
+  const t = (ru: string, en: string) => (lang === 'ru' ? nbsp(ru) : en);
   const epoch = epochAt(year),
     index = epochs.indexOf(epoch),
     date = dateLabel(year, lang),
@@ -126,8 +131,8 @@ function Observatory() {
     document.documentElement.lang = lang;
     localStorage.setItem('terra-language', lang);
     document.title = t(
-      'TERRA — Земля сквозь время',
-      'TERRA — Earth through time',
+      'Terra: Земля сквозь время',
+      'Terra: Earth through time',
     );
   }, [lang]);
   useEffect(() => {
@@ -141,7 +146,7 @@ function Observatory() {
     pop = inferred.population,
     popValue =
       pop === null
-        ? '—'
+        ? '–'
         : pop === 0
           ? '0'
           : number(pop >= 1 ? pop : pop * 1000, pop >= 1 ? 2 : 1),
@@ -184,8 +189,8 @@ function Observatory() {
         )
       : map.modern === 1
         ? t(
-            'NASA · поверхность 8K · огни по эпохе',
-            'NASA · 8K surface · lights by era',
+            'NASA · поверхность 8K',
+            'NASA · 8K surface',
           )
         : map.inferred
           ? t(
@@ -198,12 +203,12 @@ function Observatory() {
             );
   const estimate =
     year === NOW
-      ? t('ВЫ ЗДЕСЬ · НАСТОЯЩЕЕ', 'YOU ARE HERE · THE PRESENT')
+      ? t('Вы здесь · настоящее', 'You are here · the present')
       : future
-        ? t('ВОЗМОЖНОЕ БУДУЩЕЕ', 'A POSSIBLE FUTURE')
+        ? t('Возможное будущее', 'A possible future')
         : year < 1850
-          ? t('РЕКОНСТРУКЦИЯ ПРОШЛОГО', 'RECONSTRUCTING THE PAST')
-          : t('ИСТОРИЧЕСКИЕ ДАННЫЕ', 'HISTORICAL DATA');
+          ? t('Реконструкция прошлого', 'Reconstructing the past')
+          : t('Исторические данные', 'Historical data');
   const currentSources = [
     ...new Set([
       ...epoch.source,
@@ -220,14 +225,9 @@ function Observatory() {
       setFull(false);
     }
   };
-  const filtered = epochs.filter((e) =>
-    (pick(e.title, lang) + ' ' + pick(e.period, lang) + ' ' + e.year)
-      .toLowerCase()
-      .includes(search.toLowerCase()),
-  );
   const stats = [
     {
-      icon: Thermometer,
+      icon: ThermometerIcon,
       title: t('Средняя температура', 'Mean surface temperature'),
       value: temperatureText,
       unit: '°C',
@@ -241,7 +241,7 @@ function Observatory() {
             : t('Ориентир для эпохи', 'Approximate epoch value'),
     },
     {
-      icon: Users,
+      icon: UsersIcon,
       title: t('Население людей', 'Human population'),
       value: (rawPop === null ? '≈' : '') + popValue,
       inferred: rawPop === null,
@@ -261,7 +261,7 @@ function Observatory() {
                   ),
     },
     {
-      icon: Waves,
+      icon: WavesIcon,
       title: t('Покрытие океаном', 'Ocean coverage'),
       value: ocean,
       unit: '%',
@@ -273,7 +273,7 @@ function Observatory() {
           : t('Доля поверхности', 'Fraction of the surface'),
     },
     {
-      icon: Wind,
+      icon: WindIcon,
       title: t('Кислород в атмосфере', 'Atmospheric oxygen'),
       value: oxygen,
       unit: '%',
@@ -290,72 +290,78 @@ function Observatory() {
     <main
       className={`observatory ${future ? 'future' : ''} ${map.heat > 0.45 ? 'hot-world' : ''}`}
     >
-      <header className="topbar">
-        <a className="brand" href="/" aria-label="Terra">
-          <Orbit />
-          <span>
-            TERRA<span className="brand-dot">.</span>
-          </span>
-        </a>
-        <div className="language" aria-label={t('Язык', 'Language')}>
-          <Button
-            variant="ghost"
-            className={lang === 'ru' ? 'selected' : ''}
-            aria-pressed={lang === 'ru'}
-            onClick={() => setLang('ru')}
-          >
-            RU
-          </Button>
-          <Button
-            variant="ghost"
-            className={lang === 'en' ? 'selected' : ''}
-            aria-pressed={lang === 'en'}
-            onClick={() => setLang('en')}
-          >
-            EN
-          </Button>
-        </div>
-      </header>
       <section className="universe">
         <div className="ambient" />
         <div className="stars" />
-        <div className="epoch-heading">
-          <div className="eyebrow">
-            <span className="live-dot" />
-            {estimate}
+        <aside className="left-panel">
+          <div className="left-panel-header">
+            <a className="brand" href="/" aria-label="Terra">
+              <PlanetIcon />
+              <span>Terra<span className="brand-dot">.</span></span>
+            </a>
+            <div className="seg language" aria-label={t('Язык', 'Language')}>
+              {(['ru', 'en'] as const).map((l) => (
+                <button key={l} type="button" className={lang === l ? 'on' : ''} aria-pressed={lang === l} onClick={() => setLang(l)}>
+                  {l.toUpperCase()}
+                </button>
+              ))}
+            </div>
           </div>
-          <h1>{pick(epoch.title, lang)}</h1>
-          <p>
-            {t(
-              'Одна планета. Миллиарды историй.',
-              'One planet. Billions of stories.',
-            )}
-          </p>
-        </div>
-        <aside className="stats">
-          {stats.map((s) => (
-            <button
-              className="stat"
-              key={s.title}
-              onClick={() => setModal('details')}
-              aria-label={`${s.title}: ${s.value} ${s.unit}. ${t('Подробнее', 'Details')}`}
-            >
-              <div className="stat-label">
-                <s.icon />
-                {s.title}
-                <Info className="stat-info" />
+          <div className="epoch-heading">
+            <div className="eyebrow">{estimate}</div>
+            <h1>{pick(epoch.title, lang)}</h1>
+            <p>{t('Одна планета. Миллиарды историй.', 'One planet. Billions of stories.')}</p>
+          </div>
+          <div className="left-panel-content">
+            <aside className="stats">
+              {stats.map((s) => (
+                <button
+                  className="stat"
+                  key={s.title}
+                  onClick={() => setModal('details')}
+                  aria-label={`${s.title}: ${s.value} ${s.unit}. ${t('Подробнее', 'Details')}`}
+                >
+                  <div className="stat-label">
+                    <s.icon />
+                    {s.title}
+                  </div>
+                  <div className={`stat-number ${s.value.length > 6 ? 'compact-number' : ''} ${s.inferred ? 'inferred' : ''}`}>
+                    {s.value}<small>{s.unit}</small>
+                  </div>
+                  <p className={s.inferred ? 'inference-note' : undefined}>{s.note}</p>
+                </button>
+              ))}
+            </aside>
+            <aside className="story-panel">
+              <div className="section-label">
+                <SparkleIcon />
+                {t('Мгновение в истории', 'A moment in history')}
+                <span>{String(index + 1).padStart(2, '0')} / {epochs.length}</span>
               </div>
-              <div
-                className={`stat-number ${s.value.length > 6 ? 'compact-number' : ''} ${s.inferred ? 'inferred' : ''}`}
-              >
-                {s.value}
-                <small>{s.unit}</small>
+              <h2>{pick(epoch.headline, lang)}</h2>
+              <p className="story-copy" key={epoch.year + '-' + lang}>{pick(epoch.body, lang)}</p>
+              {nearFuture && (
+                <div className="scenario-picker">
+                  <div className="section-label">{t('Сценарий выбросов', 'Emissions scenario')}</div>
+                  <div className="seg seg-sm scenario-buttons">
+                    {scenarios.map((s, i) => (
+                      <button key={s.id} type="button" className={scenario === i ? 'on' : ''} onClick={() => setScenario(i)} aria-pressed={scenario === i} title={s.ssp}>
+                        {t(['Низкие', 'Средние', 'Высокие'][i], ['Low', 'Middle', 'High'][i])}
+                      </button>
+                    ))}
+                  </div>
+                  <small>+{number(warmingAt(year, scenario), 1)} °C {t('к 1850–1900', 'vs 1850–1900')} · {scenarios[scenario].ssp}</small>
+                </div>
+              )}
+              <div className="life">
+                <div className="section-label"><LeafIcon />{t('Распространённая жизнь', 'Prevalent life')}</div>
+                <div className="cluster cluster-1 tags">{pick(epoch.life, lang).split(' · ').map((x) => <span className="chip" key={x}>{x}</span>)}</div>
               </div>
-              <p className={s.inferred ? 'inference-note' : undefined}>
-                {s.note}
-              </p>
-            </button>
-          ))}
+              <button type="button" className="btn btn-link story-source" onClick={() => setModal('sources')}>
+                {t('Источники и точность', 'Sources & uncertainty')}<ArrowUpRightIcon />
+              </button>
+            </aside>
+          </div>
         </aside>
         <Globe
           jump={globeJump}
@@ -367,130 +373,49 @@ function Observatory() {
           lang={lang}
           warming={nearFuture ? warmingAt(year, scenario) : 0}
         />
-        <aside className="story-panel">
-          <div className="section-label">
-            <Sparkles />
-            {t('МГНОВЕНИЕ В ИСТОРИИ', 'A MOMENT IN HISTORY')}
-            <span>
-              {String(index + 1).padStart(2, '0')} / {epochs.length}
-            </span>
-          </div>
-          <h2>{pick(epoch.headline, lang)}</h2>
-          <p className="story-copy" key={epoch.year + '-' + lang}>
-            {pick(epoch.body, lang)}
-          </p>
-          {nearFuture && (
-            <div className="scenario-picker">
-              <div className="section-label">
-                {t('СЦЕНАРИЙ ВЫБРОСОВ', 'EMISSIONS SCENARIO')}
-              </div>
-              <div className="scenario-buttons">
-                {scenarios.map((s, i) => (
-                  <Button
-                    key={s.id}
-                    variant="ghost"
-                    className={scenario === i ? 'active' : ''}
-                    onClick={() => setScenario(i)}
-                    aria-pressed={scenario === i}
-                    title={s.ssp}
-                  >
-                    {t(
-                      ['Низкие', 'Средние', 'Высокие'][i],
-                      ['Low', 'Middle', 'High'][i],
-                    )}
-                  </Button>
-                ))}
-              </div>
-              <small>
-                +{number(warmingAt(year, scenario), 1)} °C{' '}
-                {t('к 1850–1900', 'vs 1850–1900')} · {scenarios[scenario].ssp}
-              </small>
-            </div>
-          )}
-          <div className="life">
-            <div className="section-label">
-              <Leaf />
-              {t('РАСПРОСТРАНЁННАЯ ЖИЗНЬ', 'PREVALENT LIFE')}
-            </div>
-            <div className="tags">
-              {pick(epoch.life, lang)
-                .split(' · ')
-                .map((x) => (
-                  <span key={x}>{x}</span>
-                ))}
-            </div>
-          </div>
-          <Button
-            variant="ghost"
-            className="era-badge"
-            onClick={() => {
-              setSearch('');
-              setModal('epochs');
-            }}
-          >
-            <span className="live-dot" />
-            <div>
-              {pick(epoch.period, lang).split(' · ')[0]}
-              <small>
-                {pick(epoch.period, lang).split(' · ').slice(1).join(' · ')}
-              </small>
-            </div>
-            <ChevronRight />
-          </Button>
-          <Button
-            variant="ghost"
-            className="story-source"
-            onClick={() => setModal('sources')}
-          >
-            {t('Источники и точность', 'Sources & uncertainty')}
-            <ArrowUpRight />
-          </Button>
-        </aside>
         <div className="planet-tools">
-          <Button
-            variant="outline"
-            size="icon"
+          <button
+            type="button"
+            className="btn btn-icon"
             onClick={() => setZoom((z) => z + 1)}
             aria-label={t('Приблизить', 'Zoom in')}
             title={t('Приблизить', 'Zoom in')}
           >
-            <Plus />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
+            <PlusIcon weight="regular" />
+          </button>
+          <button
+            type="button"
+            className="btn btn-icon"
             onClick={() => setZoom((z) => z - 1)}
             aria-label={t('Отдалить', 'Zoom out')}
             title={t('Отдалить', 'Zoom out')}
           >
-            <Minus />
-          </Button>
+            <MinusIcon weight="regular" />
+          </button>
           <span />
-          <Button
-            variant="outline"
-            size="icon"
+          <button
+            type="button"
+            className="btn btn-icon"
             onClick={() => setRotation((v) => !v)}
             aria-pressed={rotation}
             title={t('Автовращение', 'Auto-rotate')}
             aria-label={t('Автовращение', 'Auto-rotate')}
-            className={rotation ? 'active' : ''}
           >
-            <Orbit />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
+            <ArrowsClockwiseIcon />
+          </button>
+          <button
+            type="button"
+            className="btn btn-icon"
             onClick={() => setClouds((v) => !v)}
             aria-pressed={clouds}
             title={t('Показать облака', 'Show clouds')}
             aria-label={t('Показать облака', 'Show clouds')}
-            className={clouds ? 'active' : ''}
           >
-            <Cloud />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
+            <CloudIcon />
+          </button>
+          <button
+            type="button"
+            className="btn btn-icon"
             onClick={() => {
               setReset((v) => v + 1);
               setZoom(0);
@@ -498,22 +423,22 @@ function Observatory() {
             title={t('Сбросить ракурс', 'Reset view')}
             aria-label={t('Сбросить ракурс', 'Reset view')}
           >
-            <RotateCcw />
-          </Button>
-          <Button
-            variant="outline"
-            size="icon"
+            <ArrowCounterClockwiseIcon />
+          </button>
+          <button
+            type="button"
+            className="btn btn-icon"
             onClick={toggleFullscreen}
             title={t('Полный экран', 'Full screen')}
             aria-label={t('Полный экран', 'Full screen')}
           >
-            {full ? <Minimize2 /> : <Maximize2 />}
-          </Button>
+            {full ? <CornersInIcon /> : <CornersOutIcon />}
+          </button>
         </div>
         <div className="globe-hint">
-          <button onClick={() => setModal('sources')}>
+          <button type="button" onClick={() => setModal('sources')}>
             {mapNote}
-            <Info />
+            <InfoIcon />
           </button>
         </div>
       </section>
@@ -521,7 +446,7 @@ function Observatory() {
         <div className="timeline-top">
           <div className="date-block">
             <span className="section-label">
-              {t('ПУТЕШЕСТВИЕ ВО ВРЕМЕНИ', 'A JOURNEY THROUGH TIME')}
+              {t('Путешествие во времени', 'A journey through time')}
             </span>
             <div className="date-button">
               <h3>
@@ -541,38 +466,38 @@ function Observatory() {
             }}
           />
           <div className="time-controls">
-            <Button
-              className="full-story-button"
-              onClick={() => narrationRef.current?.startTour()}
-            >
-              <Headphones />
-              {t('Слушать всю историю', 'Listen to the full story')}
-            </Button>
-            <Button
-              variant="outline"
-              className="now-button"
+            <button
+              type="button"
+              className="btn"
               onClick={() => {
                 setGlobeJump((value) => value + 1);
                 navigate(NOW);
               }}
             >
-              <RotateCcw />
+              <ArrowCounterClockwiseIcon />
               {t('Сейчас', 'Now')}
-            </Button>
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => narrationRef.current?.startTour()}
+            >
+              <HeadphonesIcon />
+              {t('Слушать всю историю', 'Listen to the full story')}
+            </button>
           </div>
         </div>
         <div className="timeline-track">
-          <div className="timeline-ticks" />
-          <div className="now-marker" style={{ left: '72%' }} />
-          <Slider
+          <input
+            type="range"
+            className="range timeline-range"
             aria-label={t('Временная шкала', 'Time slider')}
-            value={[position]}
+            aria-valuetext={`${date.value} ${date.unit}`}
+            value={position}
             min={0}
             max={100}
             step={0.001}
-            onValueChange={(v) =>
-              navigate(positionToYear(Array.isArray(v) ? v[0] : v))
-            }
+            onChange={(e) => navigate(positionToYear(Number(e.target.value)))}
             onKeyDown={(e) => {
               if (
                 [
@@ -637,6 +562,7 @@ function Observatory() {
             },
           ].map((tick) => (
             <button
+              type="button"
               style={{ left: `${tick.p}%` }}
               className={tick.y === NOW ? 'present-tick' : ''}
               key={tick.p}
@@ -649,11 +575,11 @@ function Observatory() {
         </div>
         <div className="timeline-bottom">
           <span>
-            {t('НЕЛИНЕЙНАЯ ШКАЛА', 'NONLINEAR SCALE')}
+            {t('Нелинейная шкала', 'Nonlinear scale')}
             <span className="thin-dot">·</span>
             {t(
-              `${epochs.length} ЭПОХ · 15 АУДИОГЛАВ`,
-              `${epochs.length} EPOCHS · 15 AUDIO CHAPTERS`,
+              `${epochs.length} эпох · 15 аудиоглав`,
+              `${epochs.length} epochs · 15 audio chapters`,
             )}
           </span>
           <div className="quick-jumps">
@@ -664,18 +590,19 @@ function Observatory() {
               [2100, t('2100 год', 'Year 2100')],
               [MAX, t('Последняя глава', 'Final chapter')],
             ].map(([y, label]) => (
-              <Button
+              <button
+                type="button"
+                className="btn btn-sm"
                 key={y}
-                variant="ghost"
                 onClick={() => navigate(Number(y))}
               >
                 {label}
-              </Button>
+              </button>
             ))}
           </div>
-          <button onClick={() => setModal('sources')}>
-            {t('ДАННЫЕ', 'DATA')}: NASA · IPCC · {t('ООН', 'UN')} · PALEOMAP
-            <ArrowUpRight />
+          <button type="button" className="btn btn-link" onClick={() => setModal('sources')}>
+            {t('Данные', 'Data')}: NASA · IPCC · {t('ООН', 'UN')} · PALEOMAP
+            <ArrowUpRightIcon />
           </button>
         </div>
       </footer>
@@ -687,70 +614,16 @@ function Observatory() {
       >
         <DialogContent className="terra-dialog">
           <DialogTitle>
-            {modal === 'epochs'
-              ? t('Атлас времени', 'An atlas of time')
-              : modal === 'details'
-                ? t('За каждым числом — контекст', 'Every number has a context')
-                : t('Наука за путешествием', 'The science behind the journey')}
+            {modal === 'details'
+              ? t('За каждым числом стоит контекст', 'Every number has a context')
+              : t('Наука за путешествием', 'The science behind the journey')}
           </DialogTitle>
           <DialogDescription>
-            {modal === 'epochs'
-              ? t(
-                  `${epochs.length} коротких глав о нашем единственном доме.`,
-                  `${epochs.length} short chapters about our only home.`,
-                )
-              : t(
-                  'Наблюдения, реконструкции и сценарии — с обозначенными границами знания.',
-                  'Observations, reconstructions and scenarios, with their limits made explicit.',
-                )}
+            {t(
+              'Наблюдения, реконструкции и сценарии с обозначенными границами знания.',
+              'Observations, reconstructions and scenarios, with their limits made explicit.',
+            )}
           </DialogDescription>
-          {modal === 'epochs' && (
-            <>
-              <div className="epoch-search">
-                <Search />
-                <Input
-                  aria-label={t('Найти эпоху', 'Search epochs')}
-                  placeholder={t(
-                    'Название эпохи, период или год…',
-                    'Epoch, period or year…',
-                  )}
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
-              <div className="epoch-list">
-                {filtered.length === 0 ? (
-                  <p className="empty">
-                    {t(
-                      'Эпохи не найдены. Попробуйте другое название.',
-                      'No epochs found. Try another name.',
-                    )}
-                  </p>
-                ) : (
-                  filtered.map((e) => (
-                    <button
-                      key={e.year}
-                      className={e === epoch ? 'current' : ''}
-                      onClick={() => {
-                        navigate(e.year);
-                        setModal(null);
-                      }}
-                    >
-                      <span>
-                        {dateLabel(e.year, lang).value}
-                        <small>{dateLabel(e.year, lang).unit}</small>
-                      </span>
-                      <div>
-                        <strong>{pick(e.title, lang)}</strong>
-                        <small>{pick(e.period, lang)}</small>
-                      </div>
-                      {e === epoch ? <Check /> : <ArrowUpRight />}
-                    </button>
-                  ))
-                )}
-              </div>
-            </>
-          )}
           {modal === 'details' && (
             <div className="detail-content">
               <div className="detail-grid">
@@ -813,21 +686,21 @@ function Observatory() {
               </dl>
               <p className="method-note">
                 {t(
-                  'Серые числа со знаком ≈ — ИИ-реконструкция, а не научные измерения. Пропуски заполнены интерполяцией и условными опорными значениями. После 2100 население показано как условный сценарий снижения, а не прогноз ООН: действительное будущее неизвестно. Для 2026 используется температура полного 2025 года.',
+                  'Серые числа со знаком ≈ показывают ИИ-реконструкцию, а не научные измерения. Пропуски заполнены интерполяцией и условными опорными значениями. После 2100 население показано как условный сценарий снижения, а не прогноз ООН: действительное будущее неизвестно. Для 2026 используется температура полного 2025 года.',
                   'Grey values marked ≈ are AI reconstructions, not scientific measurements. Gaps use interpolation and hypothetical anchor values. Population after 2100 is an illustrative declining scenario, not a UN forecast; the actual future is unknown. The 2026 view uses the complete 2025 temperature.',
                 )}
               </p>
-              <Button variant="outline" onClick={() => setModal('sources')}>
+              <button type="button" className="btn" onClick={() => setModal('sources')}>
                 {t('Открыть источники', 'Open sources')}
-                <ArrowUpRight />
-              </Button>
+                <ArrowUpRightIcon />
+              </button>
             </div>
           )}
           {modal === 'sources' && (
             <div className="source-content">
               <p className="moon-method">
                 {t(
-                  'Луна появляется около 4,5 млрд лет назад, остывает и постепенно приобретает кратеры и тёмные вулканические моря. Древний вид условный; современная карта — NASA Scientific Visualization Studio / LRO. Размер относительно Земли сохранён, расстояние сжато для наглядности. Будущий нагрев и исчезновение вместе с Землёй — иллюстрация выбранного солнечного сценария, а не расчёт лунной орбиты.',
+                  'Луна появляется около 4,5 млрд лет назад, остывает и постепенно приобретает кратеры и тёмные вулканические моря. Древний вид условный; современная карта: NASA Scientific Visualization Studio / LRO. Размер относительно Земли сохранён, расстояние сжато для наглядности. Будущий нагрев и исчезновение вместе с Землёй иллюстрируют выбранный солнечный сценарий, а не расчёт лунной орбиты.',
                   'The Moon appears around 4.5 billion years ago, cools, and gradually develops craters and dark volcanic plains. Ancient surfaces are illustrative; the modern map is from NASA Scientific Visualization Studio / LRO. Relative size is preserved; distance is compressed for visibility. Future heating and disappearance with Earth illustrate the selected solar scenario, not a calculated lunar orbit.',
                 )}{' '}
                 <a
@@ -855,7 +728,7 @@ function Observatory() {
                 </a>
               </p>
               <div className="method-box">
-                <Info />
+                <InfoIcon />
                 <div>
                   <h4>
                     {t(
@@ -871,7 +744,7 @@ function Observatory() {
                   </p>
                   <p>
                     {t(
-                      'Современная поверхность — NASA Blue Marble (2004), 8K, рельеф GEBCO. Остальные эпохи — 4K с условным мелким рельефом. Движение берегов рассчитано между реконструкциями, а не физической моделью тектоники. До 1882 года искусственное свечение скрыто. Затем показаны выборочные подтверждённые очаги: Лондон и Нью-Йорк с 1882-го, Токио с 1887-го. Это усиленные отметки, не полная карта освещения. Спутниковая карта ночных огней 2016 года появляется только с 2016-го. Её затухание после 2100 года условно. География далёкого будущего — один из сценариев.',
+                      'Современная поверхность: NASA Blue Marble (2004), 8K, рельеф GEBCO. Остальные эпохи: 4K с условным мелким рельефом. Движение берегов рассчитано между реконструкциями, а не физической моделью тектоники. До 1882 года искусственное свечение скрыто. Затем показаны выборочные подтверждённые очаги: Лондон и Нью-Йорк с 1882-го, Токио с 1887-го. Это усиленные отметки, не полная карта освещения. Спутниковая карта ночных огней 2016 года появляется только с 2016-го. Её затухание после 2100 года условно. География далёкого будущего показывает один из сценариев.',
                       'Modern surface: NASA Blue Marble (2004), 8K, with GEBCO relief. Other eras use 4K maps with illustrative fine relief. Registered coast motion is not a physical tectonic model. Artificial glow is hidden before 1882. Selected documented locations then appear: London and New York from 1882, Tokyo from 1887. These are amplified markers, not complete historical lighting maps. The 2016 satellite night map only appears from 2016. Its decline after 2100 is hypothetical. Deep-future geography illustrates one scenario.',
                     )}
                   </p>
@@ -921,7 +794,7 @@ function Observatory() {
                 </a>
               </p>
               <h4 className="sources-subtitle">
-                {t('ДЛЯ ВЫБРАННОЙ ЭПОХИ', 'FOR THE SELECTED EPOCH')}
+                {t('Для выбранной эпохи', 'For the selected epoch')}
               </h4>
               {currentSources.map((id) => (
                 <a
@@ -935,7 +808,7 @@ function Observatory() {
                     <strong>{sources[id].title}</strong>
                     <p>{pick(sources[id].note, lang)}</p>
                   </div>
-                  <ArrowUpRight />
+                  <ArrowUpRightIcon />
                 </a>
               ))}
               <details>
@@ -956,7 +829,7 @@ function Observatory() {
                         <strong>{s.title}</strong>
                         <p>{pick(s.note, lang)}</p>
                       </div>
-                      <ArrowUpRight />
+                      <ArrowUpRightIcon />
                     </a>
                   ))}
                 <p className="method-note">
@@ -974,8 +847,8 @@ function Observatory() {
                   </a>
                   .{' '}
                   {t(
-                    'Оформление TERRA; карточка для соцсетей создана с помощью ИИ.',
-                    'TERRA design; social preview artwork is AI-generated.',
+                    'Оформление Terra; карточка для соцсетей создана с помощью ИИ.',
+                    'Terra design; social preview artwork is AI-generated.',
                   )}
                 </p>
               </details>

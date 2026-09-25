@@ -14,13 +14,7 @@ import {
   SelectContent,
   SelectItem,
 } from '@/components/ui/select';
-import {
-  Play,
-  Pause,
-  ChevronLeft,
-  ChevronRight,
-  Headphones,
-} from 'lucide-react';
+import { PlayIcon, PauseIcon, CaretLeftIcon, CaretRightIcon, HeadphonesIcon } from '@phosphor-icons/react';
 import {
   audioChapters,
   chapterIndexAt,
@@ -28,7 +22,7 @@ import {
   playbackRates,
   hasAudio,
 } from './narration';
-import type { Lang } from './epochs';
+import { nbsp, type Lang } from './epochs';
 const clock = (s: number) =>
   `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
 export type NarrationHandle = { startTour: () => void };
@@ -54,7 +48,7 @@ const NarrationPlayer = forwardRef<
   const i = chapterIndexAt(year),
     chapter = audioChapters[i];
   const available = hasAudio(chapter.id, lang);
-  const t = (ru: string, en: string) => (lang === 'ru' ? ru : en);
+  const t = (ru: string, en: string) => (lang === 'ru' ? nbsp(ru) : en);
   const play = async (a: HTMLAudioElement) => {
     const id = ++request.current;
     a.playbackRate = rate;
@@ -148,9 +142,9 @@ const NarrationPlayer = forwardRef<
         }}
       />
       <div className="narration-heading">
-        <Headphones size={14} />
+        <HeadphonesIcon size={14} />
         <span>
-          {t('ГЛАВА', 'CHAPTER')} {i + 1}/15
+          {t('Глава', 'Chapter')} {i + 1}/15
         </span>
         <Select
           value={i}
@@ -168,7 +162,7 @@ const NarrationPlayer = forwardRef<
             className="narration-menu"
             side="top"
             alignItemWithTrigger={false}
-            sideOffset={12}
+            sideOffset={8}
           >
             {audioChapters.map((c, n) => (
               <SelectItem key={c.id} value={n}>
@@ -182,19 +176,20 @@ const NarrationPlayer = forwardRef<
       <div className="narration-controls">
         <button
           type="button"
+          className="btn btn-icon"
           disabled={i === 0}
           onClick={() => choose(i - 1)}
           aria-label={t('Предыдущая аудиоглава', 'Previous audio chapter')}
         >
-          <ChevronLeft size={16} />
+          <CaretLeftIcon size={16} />
         </button>
         <button
           type="button"
-          className="narration-play"
+          className="btn btn-icon narration-play"
           disabled={!available}
           aria-label={
             playing
-              ? t('Пауза', 'Pause')
+              ? t('Пауза', 'PauseIcon')
               : error
                 ? t('Повторить загрузку аудио', 'Retry audio')
                 : t('Слушать главу', 'Listen to chapter')
@@ -212,18 +207,20 @@ const NarrationPlayer = forwardRef<
             }
           }}
         >
-          {playing ? <Pause size={17} /> : <Play size={17} />}
+          {playing ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
         </button>
         <button
           type="button"
+          className="btn btn-icon"
           disabled={i === audioChapters.length - 1}
           onClick={() => choose(i + 1)}
           aria-label={t('Следующая аудиоглава', 'Next audio chapter')}
         >
-          <ChevronRight size={16} />
+          <CaretRightIcon size={16} />
         </button>
         <input
           type="range"
+          className="range"
           aria-label={t('Позиция в аудиозаписи', 'Audio playback position')}
           min={0}
           max={duration || 1}
@@ -256,6 +253,7 @@ const NarrationPlayer = forwardRef<
             className="narration-menu rate-menu"
             side="top"
             alignItemWithTrigger={false}
+            sideOffset={8}
           >
             {playbackRates.map((r) => (
               <SelectItem key={r} value={r}>
@@ -265,7 +263,7 @@ const NarrationPlayer = forwardRef<
           </SelectContent>
         </Select>
         <label
-          className="narration-tour"
+          className="check narration-tour"
           title={t(
             'Следующая глава после окончания рассказа',
             'Advance when narration ends',
@@ -276,7 +274,6 @@ const NarrationPlayer = forwardRef<
             checked={tour}
             onChange={(e) => setTour(e.target.checked)}
           />
-          <span className="tour-switch" aria-hidden="true" />
           {t('Авто', 'Auto')}
         </label>
       </div>
